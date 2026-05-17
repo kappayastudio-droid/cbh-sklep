@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# b2b-shop
 
-## Getting Started
+Sklep internetowy B2B z ukrytymi cenami dla niezalogowanych użytkowników.
 
-First, run the development server:
+## Stack
+
+- **Next.js 15** (App Router, TypeScript) + **React 19**
+- **Tailwind CSS v4** + **shadcn/ui**
+- **Supabase** — Postgres, Auth, Storage, RLS
+- **Przelewy24** — płatności
+- **Fakturownia** — faktury VAT (API)
+- **Resend** — e-mail transakcyjny
+- Hosting: **Vercel**
+
+## Wymagania
+
+- Node.js 20+
+- pnpm 9+
+
+## Start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.example .env.local   # uzupełnij sekrety (gdy plik powstanie)
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Otwórz [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Skrypty
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Komenda | Opis |
+| --- | --- |
+| `pnpm dev` | dev server z hot reloadem |
+| `pnpm build` | build produkcyjny |
+| `pnpm start` | serwer produkcyjny |
+| `pnpm lint` | ESLint |
 
-## Learn More
+## Struktura
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/            # App Router (strony, layouty, route handlers)
+  components/ui/  # komponenty shadcn/ui
+  lib/            # utils, klienci zewnętrznych usług
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Wdrożenie przez Vercel — podłącz repo, ustaw zmienne środowiskowe (patrz `CLAUDE.md`), build odpalany automatycznie.
 
-## Deploy on Vercel
+## Dokumentacja wewnętrzna
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Szczegóły domenowe, reguły biznesowe i konwencje techniczne — patrz [`CLAUDE.md`](./CLAUDE.md).
