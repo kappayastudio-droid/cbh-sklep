@@ -12,6 +12,19 @@ function configured() {
   )
 }
 
+// Konta, które po rejestracji od razu dostają rolę admina + zatwierdzenie
+// (bootstrap — właściciel sklepu). Można dołożyć adresy przez env ADMIN_EMAILS
+// (rozdzielone przecinkami). Porównanie bez rozróżniania wielkości liter.
+const BOOTSTRAP_ADMINS = ["leon.polus@chenice.pl"]
+
+function isBootstrapAdmin(email: string) {
+  const list = [
+    ...BOOTSTRAP_ADMINS,
+    ...(process.env.ADMIN_EMAILS ?? "").split(","),
+  ].map((e) => e.trim().toLowerCase()).filter(Boolean)
+  return list.includes(email.toLowerCase())
+}
+
 export async function signup(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim()
   const password = String(formData.get("password") ?? "")
@@ -44,25 +57,35 @@ export async function signup(formData: FormData) {
     },
   })
 
-  // Zapis adresu domyślnego z rejestracji (przez klienta admina — użytkownik
-  // nie ma jeszcze sesji, a trigger nie obsługuje adresów).
+  // Po udanej rejestracji (przez klienta admina — użytkownik nie ma jeszcze sesji):
+  // 1) zapis adresu domyślnego, 2) ewentualna promocja na admina (bootstrap).
   const line1 = String(formData.get("address1") ?? "").trim()
   const city = String(formData.get("city") ?? "").trim()
   const postalCode = String(formData.get("postalCode") ?? "").trim()
-  if (!error && data.user && (line1 || city || postalCode)) {
+  if (!error && data.user) {
     try {
       const admin = createAdminClient()
-      await admin.from("addresses").insert({
-        profile_id: data.user.id,
-        line1,
-        line2: String(formData.get("address2") ?? "").trim() || null,
-        city,
-        postal_code: postalCode,
-        country: "PL",
-        is_default: true,
-      })
+
+      if (line1 || city || postalCode) {
+        await admin.from("addresses").insert({
+          profile_id: data.user.id,
+          line1,
+          line2: String(formData.get("address2") ?? "").trim() || null,
+          city,
+          postal_code: postalCode,
+          country: "PL",
+          is_default: true,
+        })
+      }
+
+      if (isBootstrapAdmin(email)) {
+        await admin
+          .from("profiles")
+          .update({ role: "admin", is_approved: true })
+          .eq("id", data.user.id)
+      }
     } catch {
-      // Brak zapisu adresu nie może blokować rejestracji.
+      // Błąd zapisu adresu/promocji nie może blokować rejestracji.
     }
   }
 
