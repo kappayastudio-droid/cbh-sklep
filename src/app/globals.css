@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-heading: var(--font-fraunces), Georgia, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -39,6 +39,16 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* Hierarchia powierzchni (Keanis-style: subtelne warstwy) */
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+
+  /* Akcent marki (ciepły, dla B2B premium) */
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -46,26 +56,42 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Spacing scale — power-of-2: 2/4/8/16/32/64/128/256 px
+     Działa z każdą Tailwindową utility: p-, m-, gap-, space-, w-, h-, top-, etc.
+     Przykład: <div class="p-md gap-sm" /> = padding 16px, gap 8px */
+  --spacing-2xs: 0.125rem;  /* 2px  */
+  --spacing-xs:  0.25rem;   /* 4px  */
+  --spacing-sm:  0.5rem;    /* 8px  */
+  --spacing-md:  1rem;      /* 16px */
+  --spacing-lg:  2rem;      /* 32px */
+  --spacing-xl:  4rem;      /* 64px */
+  --spacing-2xl: 8rem;      /* 128px */
+  --spacing-3xl: 16rem;     /* 256px */
+
+  /* Container max-widths */
+  --container-content: 70rem; /* 1120px — typowa szerokość kontentu */
+  --container-narrow:  42rem; /* 672px  — tekstowy kontent (artykuły, formularze) */
 }
 
 :root {
-  --background: oklch(1 0 0);
+  --background: #f0efeb;
   --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
+  --card: #f0efeb;
   --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
+  --popover: #f4f3ef;
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+  --secondary: #e7e5df;
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
+  --muted: #e7e5df;
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  --accent: #e7e5df;
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  --border: #dedcd4;
+  --input: #dedcd4;
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
@@ -81,6 +107,15 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Surface hierarchy — od najjaśniejszej (page bg) do najgłębszej */
+  --surface-1: #f4f3ef;   /* karty na tle background (jaśniejsze — wyróżnia się) */
+  --surface-2: #e9e7e1;   /* zagłębione panele / tło zdjęć produktów */
+  --surface-3: #e2e0d9;   /* wyróżnione obszary, code blocks */
+
+  /* Marka — ciepły akcent (gold / champagne) */
+  --brand: oklch(0.62 0.14 65);
+  --brand-foreground: oklch(0.99 0 0);
 }
 
 .dark {
@@ -115,6 +150,15 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* Surface hierarchy (dark) */
+  --surface-1: oklch(0.18 0 0);
+  --surface-2: oklch(0.22 0 0);
+  --surface-3: oklch(0.26 0 0);
+
+  /* Brand (dark) */
+  --brand: oklch(0.72 0.13 70);
+  --brand-foreground: oklch(0.15 0 0);
 }
 
 @layer base {
@@ -123,8 +167,138 @@
   }
   body {
     @apply bg-background text-foreground;
+    letter-spacing: 0;
   }
   html {
     @apply font-sans;
   }
+}
+
+/* Material Design 2 Type Scale (responsywne)
+   Spec: https://m2.material.io/design/typography/the-type-system.html#type-scale
+   Nagłówki h1-h4 używają clamp() — skalują się płynnie mobile→desktop.
+   Letter-spacing wg MD2 (px). Line-height: unitless (multiplier) dla zgodności ze skalowaniem. */
+
+@utility text-h1 {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 6vw + 1rem, 6rem);
+  line-height: 1.05;
+  font-weight: 300;
+  letter-spacing: -0.015em;
+}
+
+@utility text-h2 {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4.5vw + 0.75rem, 3.75rem);
+  line-height: 1.1;
+  font-weight: 300;
+  letter-spacing: -0.008em;
+}
+
+@utility text-h3 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 3vw + 0.75rem, 3rem);
+  line-height: 1.15;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+@utility text-h4 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 1.5vw + 1rem, 2.125rem);
+  line-height: 1.2;
+  font-weight: 400;
+  letter-spacing: 0.0074em;
+}
+
+@utility text-h5 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  line-height: 1.33;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+@utility text-h6 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  line-height: 1.6;
+  font-weight: 500;
+  letter-spacing: 0.0075em;
+}
+
+@utility text-subtitle1 {
+  font-size: 1rem;
+  line-height: 1.75;
+  font-weight: 400;
+  letter-spacing: 0.009em;
+}
+
+@utility text-subtitle2 {
+  font-size: 0.875rem;
+  line-height: 1.57;
+  font-weight: 500;
+  letter-spacing: 0.007em;
+}
+
+@utility text-body1 {
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 400;
+  letter-spacing: 0.031em;
+}
+
+@utility text-body2 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 400;
+  letter-spacing: 0.018em;
+}
+
+@utility text-button {
+  font-size: 0.875rem;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: 0.089em;
+  text-transform: uppercase;
+}
+
+@utility text-caption {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 400;
+  letter-spacing: 0.033em;
+}
+
+@utility text-overline {
+  font-size: 0.625rem;
+  line-height: 1.6;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* Section padding — jednolite poziomo i pionowo, skalowanie mobile→desktop
+   Każda <section className="section-x section-y"> ma identyczny rytm.
+   Wartości:
+     section-x: 24px (mobile) → 96px (desktop)
+     section-y: 48px (mobile) → 128px (desktop) */
+
+@utility section-x {
+  padding-inline: clamp(1.5rem, 5vw + 0.5rem, 6rem);
+}
+
+@utility section-y {
+  padding-block: clamp(2.5rem, 5vw + 0.5rem, 3.5rem);
+}
+
+/* Content container — auto-centered, max-width z tokenu */
+@utility container-content {
+  max-width: var(--container-content);
+  margin-inline: auto;
+}
+
+@utility container-narrow {
+  max-width: var(--container-narrow);
+  margin-inline: auto;
 }
