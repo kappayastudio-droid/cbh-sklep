@@ -1,4 +1,6 @@
 import { setOrderStatus } from "@/app/admin/actions"
+import { DpdExport } from "@/components/admin/dpd-export"
+import { OrderShipping } from "@/components/admin/order-shipping"
 import { Button } from "@/components/ui/button"
 import { Typography } from "@/components/ui/typography"
 import { adminListOrders } from "@/lib/admin"
@@ -24,9 +26,12 @@ export default async function AdminOrdersPage() {
 
   return (
     <div className="flex flex-col gap-md">
-      <Typography variant="body2" className="text-muted-foreground">
-        {orders.length} {orders.length === 1 ? "zamówienie" : "zamówień"}.
-      </Typography>
+      <div className="flex flex-wrap items-center justify-between gap-sm">
+        <Typography variant="body2" className="text-muted-foreground">
+          {orders.length} {orders.length === 1 ? "zamówienie" : "zamówień"}.
+        </Typography>
+        <DpdExport orders={orders} />
+      </div>
 
       {orders.map((o) => (
         <article
@@ -61,10 +66,25 @@ export default async function AdminOrdersPage() {
             ))}
           </ul>
 
-          {o.address && (
-            <p className="mt-sm text-caption text-muted-foreground">
-              Dostawa: {o.address}
-            </p>
+          {o.addr ? (
+            <OrderShipping
+              orderRef={o.id.slice(0, 8)}
+              recipientName={o.recipientName}
+              company={o.customerCompany}
+              line1={o.addr.line1}
+              line2={o.addr.line2}
+              postalCode={o.addr.postalCode}
+              city={o.addr.city}
+              phone={o.phone}
+              email={o.customerEmail}
+              weightGrams={o.weightGrams}
+            />
+          ) : (
+            o.address && (
+              <p className="mt-sm text-caption text-muted-foreground">
+                Dostawa: {o.address}
+              </p>
+            )
           )}
 
           {/* Zmiana statusu */}

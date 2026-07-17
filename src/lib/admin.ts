@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 
 import { getSession } from "@/lib/auth"
 import { deriveLine } from "@/lib/product-line"
+import { estimateWeightGrams } from "@/lib/shipping-weight"
 import { createAdminClient } from "@/lib/supabase/admin"
 
 /**
@@ -118,6 +119,17 @@ export type AdminOrder = {
   customerCompany: string | null
   address: string | null
   items: AdminOrderItem[]
+  /** Dane do nadania w DPD. */
+  recipientName: string | null
+  phone: string | null
+  addr: {
+    line1: string
+    line2: string | null
+    postalCode: string
+    city: string
+  } | null
+  /** Szacowana waga paczki (gram) — podpowiedź, edytowalna przy nadawaniu. */
+  weightGrams: number
 }
 
 /** Wszystkie zamówienia (najnowsze pierwsze) z pozycjami, klientem i adresem. */
@@ -142,7 +154,10 @@ export async function adminListOrders(): Promise<AdminOrder[]> {
         .from("order_items")
         .select("order_id, name_snapshot, unit_price_net, qty")
         .in("order_id", orderIds),
-      supabase.from("profiles").select("id, company_name").in("id", profileIds),
+      supabase
+        .from("profiles")
+        .select("id, company_name, phone")
+        .in("id", profileIds),
       addressIds.length
         ? supabase
             .from("addresses")
@@ -165,6 +180,9 @@ export async function adminListOrders(): Promise<AdminOrder[]> {
   const companyById = new Map(
     (profiles ?? []).map((p) => [p.id, p.company_name])
   )
+  const phoneById = new Map(
+    (profiles ?? []).map((p) => [p.id, (p as { phone?: string }).phone ?? null])
+  )
   const addressById = new Map(
     (addresses ?? []).map((a) => [
       a.id,
@@ -173,20 +191,47 @@ export async function adminListOrders(): Promise<AdminOrder[]> {
         .join(", "),
     ])
   )
+  const addrPartsById = new Map(
+    (addresses ?? []).map((a) => [
+      a.id,
+      {
+        line1: a.line1 ?? "",
+        line2: a.line2 ?? null,
+        postalCode: a.postal_code ?? "",
+        city: a.city ?? "",
+      },
+    ])
+  )
   const emailById = new Map(
     (usersRes.data?.users ?? []).map((u) => [u.id, u.email ?? "—"])
   )
+  const nameById = new Map(
+    (usersRes.data?.users ?? []).map((u) => {
+      const meta = (u.user_metadata ?? {}) as Record<string, string>
+      const name = [meta.first_name, meta.last_name].filter(Boolean).join(" ")
+      return [u.id, name || null]
+    })
+  )
 
-  return orders.map((o) => ({
-    id: o.id,
-    createdAt: o.created_at,
-    status: o.status,
-    totalNet: o.total_net,
-    customerEmail: emailById.get(o.profile_id) ?? "—",
-    customerCompany: companyById.get(o.profile_id) ?? null,
-    address: o.shipping_address_id
-      ? (addressById.get(o.shipping_address_id) ?? null)
-      : null,
-    items: itemsByOrder.get(o.id) ?? [],
-  }))
+  return orders.map((o) => {
+    const items = itemsByOrder.get(o.id) ?? []
+    return {
+      id: o.id,
+      createdAt: o.created_at,
+      status: o.status,
+      totalNet: o.total_net,
+      customerEmail: emailById.get(o.profile_id) ?? "—",
+      customerCompany: companyById.get(o.profile_id) ?? null,
+      address: o.shipping_address_id
+        ? (addressById.get(o.shipping_address_id) ?? null)
+        : null,
+      items,
+      recipientName: nameById.get(o.profile_id) ?? null,
+      phone: phoneById.get(o.profile_id) ?? null,
+      addr: o.shipping_address_id
+        ? (addrPartsById.get(o.shipping_address_id) ?? null)
+        : null,
+      weightGrams: estimateWeightGrams(items),
+    }
+  })
 }
