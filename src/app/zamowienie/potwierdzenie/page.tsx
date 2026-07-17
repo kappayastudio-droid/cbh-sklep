@@ -37,9 +37,9 @@ export default function OrderConfirmationPage() {
             Zamówienie zostało złożone
           </Typography>
           <Typography variant="body2" className="mb-lg text-muted-foreground">
-            Dziękujemy! Przyjęliśmy Twoje zamówienie do realizacji. Wkrótce
-            potwierdzimy je mailowo. Płatność online i faktura zostaną dodane w
-            kolejnym etapie.
+            Dziękujemy! Przyjęliśmy Twoje zamówienie. Potwierdzenie wyślemy na
+            Twój adres e-mail. Jeśli płatność online została zrealizowana,
+            zaksięgujemy ją automatycznie po potwierdzeniu przez Przelewy24.
           </Typography>
           <div className="flex flex-col items-center gap-sm sm:flex-row sm:justify-center">
             <Button size="lg" render={<Link href="/sklep" />}>

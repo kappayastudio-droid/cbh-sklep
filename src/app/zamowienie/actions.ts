@@ -3,7 +3,20 @@
 import { redirect } from "next/navigation"
 
 import { sendOrderConfirmation } from "@/lib/email"
+import {
+  grossFromNet,
+  isP24Configured,
+  registerTransaction,
+  gatewayUrl,
+} from "@/lib/p24"
 import { createClient } from "@/lib/supabase/server"
+
+function siteUrl() {
+  return (
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+    "http://localhost:3000"
+  )
+}
 
 type IncomingItem = { slug: string; variantValue: string | null; qty: number }
 
@@ -161,7 +174,42 @@ export async function placeOrder(formData: FormData) {
     .from("order_items")
     .insert(lineItems.map((li) => ({ ...li, order_id: order.id })))
 
-  // Mail potwierdzający (best-effort — brak/awaria maila nie blokuje zamówienia).
+  // ── Płatność online Przelewy24 (jeśli skonfigurowane) ───────────────────
+  // Sesja P24 = id zamówienia. Do bramki wysyłamy kwotę BRUTTO (net + VAT 23%).
+  // Zamówienie zostaje `pending`; status `paid` ustawia webhook po weryfikacji.
+  if (isP24Configured() && user.email) {
+    await supabase
+      .from("orders")
+      .update({ p24_session_id: order.id })
+      .eq("id", order.id)
+
+    let token: string | null = null
+    try {
+      token = await registerTransaction({
+        sessionId: order.id,
+        amount: grossFromNet(totalNet),
+        email: user.email,
+        description: `Zamówienie #${order.id.slice(0, 8)} — CBH Polska`,
+        urlReturn: `${siteUrl()}/zamowienie/potwierdzenie?order=${order.id}`,
+        urlStatus: `${siteUrl()}/api/p24/webhook`,
+      })
+    } catch {
+      token = null
+    }
+
+    if (token) {
+      redirect(gatewayUrl(token)) // przekierowanie na bramkę P24
+    }
+    // Rejestracja się nie powiodła — wróć do koszyka z informacją.
+    redirect(
+      "/koszyk?error=" +
+        encodeURIComponent(
+          "Nie udało się rozpocząć płatności. Spróbuj ponownie."
+        )
+    )
+  }
+
+  // ── Fallback bez płatności online: potwierdzenie mailem + strona podziękowania.
   if (user.email) {
     await sendOrderConfirmation({
       to: user.email,
