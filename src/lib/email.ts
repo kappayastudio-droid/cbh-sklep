@@ -2,7 +2,7 @@ import "server-only"
 
 import { Resend } from "resend"
 
-import { formatPriceNet } from "@/lib/format"
+import { formatPriceNet, grossFromNet, vatFromNet } from "@/lib/format"
 
 /**
  * Wysyłka e-maili transakcyjnych (Resend).
@@ -79,15 +79,27 @@ function renderOrderHtml({
         <table style="width:100%;border-collapse:collapse;font-size:14px;">
           ${rows}
           <tr>
-            <td style="padding:14px 0 0;font-weight:600;">Razem netto</td>
-            <td style="padding:14px 0 0;text-align:right;font-weight:600;">${formatPriceNet(
+            <td style="padding:14px 0 2px;color:#5c584f;">Razem netto</td>
+            <td style="padding:14px 0 2px;text-align:right;color:#5c584f;">${formatPriceNet(
               totalNet
+            )}</td>
+          </tr>
+          <tr>
+            <td style="padding:2px 0;color:#5c584f;">VAT 23%</td>
+            <td style="padding:2px 0;text-align:right;color:#5c584f;">${formatPriceNet(
+              vatFromNet(totalNet)
+            )}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0 0;border-top:1px solid #dedcd4;font-weight:600;">Do zapłaty (brutto)</td>
+            <td style="padding:8px 0 0;border-top:1px solid #dedcd4;text-align:right;font-weight:600;">${formatPriceNet(
+              grossFromNet(totalNet)
             )}</td>
           </tr>
         </table>
 
         <p style="margin:18px 0 0;color:#8a857c;font-size:12px;line-height:1.6;">
-          Ceny netto (bez VAT). Do zamówienia zostanie wystawiona faktura VAT.
+          Kwota do zapłaty zawiera VAT 23%. Do zamówienia zostanie wystawiona faktura VAT.
           W razie pytań odpowiedz na tę wiadomość lub skontaktuj się z opiekunem handlowym.
         </p>
       </div>

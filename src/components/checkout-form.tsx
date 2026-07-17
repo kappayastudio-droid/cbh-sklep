@@ -6,7 +6,7 @@ import { placeOrder } from "@/app/zamowienie/actions"
 import { Button } from "@/components/ui/button"
 import { Typography } from "@/components/ui/typography"
 import { useCart } from "@/lib/cart/cart-context"
-import { formatPriceNet } from "@/lib/format"
+import { formatPriceNet, grossFromNet, vatFromNet } from "@/lib/format"
 
 const inputClass =
   "h-11 w-full appearance-none rounded-lg border border-border bg-background px-md text-body2 text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40"
@@ -139,16 +139,26 @@ export function CheckoutForm({ defaults }: { defaults: Defaults }) {
           ))}
         </ul>
 
-        <div className="mt-md flex items-baseline justify-between">
-          <span className="text-body2 text-muted-foreground">Suma netto</span>
+        <div className="mt-md flex items-baseline justify-between text-body2">
+          <span className="text-muted-foreground">Suma netto</span>
+          <span className="tabular-nums">{formatPriceNet(subtotalNet)}</span>
+        </div>
+        <div className="mt-2xs flex items-baseline justify-between text-body2">
+          <span className="text-muted-foreground">VAT 23%</span>
+          <span className="tabular-nums">
+            {formatPriceNet(vatFromNet(subtotalNet))}
+          </span>
+        </div>
+        <div className="mt-sm flex items-baseline justify-between border-t border-border pt-sm">
+          <span className="text-body2 font-medium">Do zapłaty (brutto)</span>
           <span className="text-h6 font-semibold tabular-nums">
-            {formatPriceNet(subtotalNet)}
+            {formatPriceNet(grossFromNet(subtotalNet))}
           </span>
         </div>
 
         <p className="mt-sm text-caption text-muted-foreground">
-          Ceny netto. Płatność online zostanie dodana wkrótce — na razie
-          zamówienie trafi do realizacji, a my potwierdzimy je mailowo.
+          Ceny netto, płatność brutto. Po złożeniu zamówienia przejdziesz do
+          bezpiecznej płatności Przelewy24.
         </p>
 
         <Button type="submit" size="lg" className="mt-md w-full">

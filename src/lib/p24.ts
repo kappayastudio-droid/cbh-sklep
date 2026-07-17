@@ -15,12 +15,6 @@ import crypto from "crypto"
 
 const CURRENCY = "PLN"
 
-/** VAT 23% — do bramki wysyłamy kwotę BRUTTO (net × 1.23), w groszach. */
-export const VAT_RATE = 0.23
-export function grossFromNet(net: number): number {
-  return Math.round(net * (1 + VAT_RATE))
-}
-
 function cfg() {
   return {
     merchantId: Number(process.env.P24_MERCHANT_ID),

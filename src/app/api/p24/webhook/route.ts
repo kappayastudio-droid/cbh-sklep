@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server"
 
 import { sendOrderConfirmation } from "@/lib/email"
-import { grossFromNet, verifyNotificationSign, verifyTransaction } from "@/lib/p24"
+import { grossFromNet } from "@/lib/format"
+import { verifyNotificationSign, verifyTransaction } from "@/lib/p24"
 import { createAdminClient } from "@/lib/supabase/admin"
 
 export const dynamic = "force-dynamic"

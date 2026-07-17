@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Section } from "@/components/ui/section"
 import { Typography } from "@/components/ui/typography"
 import { useCart } from "@/lib/cart/cart-context"
-import { formatPriceNet } from "@/lib/format"
+import { formatPriceNet, grossFromNet, vatFromNet } from "@/lib/format"
 
 export default function CartPage() {
   const { items, count, hydrated, setQty, removeItem, clear } = useCart()
@@ -173,17 +173,29 @@ export default function CartPage() {
               </div>
               {priced.length > 0 ? (
                 <>
-                  <div className="mt-sm flex items-baseline justify-between">
-                    <span className="text-body2 text-muted-foreground">
+                  <div className="mt-sm flex items-baseline justify-between text-body2">
+                    <span className="text-muted-foreground">
                       Suma netto{!allPriced && " (pozycje z ceną)"}
                     </span>
-                    <span className="text-h6 font-semibold tabular-nums">
+                    <span className="tabular-nums">
                       {formatPriceNet(subtotalNet)}
                     </span>
                   </div>
+                  <div className="mt-2xs flex items-baseline justify-between text-body2">
+                    <span className="text-muted-foreground">VAT 23%</span>
+                    <span className="tabular-nums">
+                      {formatPriceNet(vatFromNet(subtotalNet))}
+                    </span>
+                  </div>
+                  <div className="mt-sm flex items-baseline justify-between border-t border-border pt-sm">
+                    <span className="text-body2 font-medium">Do zapłaty (brutto)</span>
+                    <span className="text-h6 font-semibold tabular-nums">
+                      {formatPriceNet(grossFromNet(subtotalNet))}
+                    </span>
+                  </div>
                   <p className="mt-md text-caption text-muted-foreground">
-                    Płatność online i faktura zostaną dodane wkrótce — zamówienie
-                    przyjmiemy i potwierdzimy mailowo.
+                    Płatność online (Przelewy24). Fakturę VAT wystawiamy do
+                    zamówienia.
                   </p>
                   <Button
                     size="lg"

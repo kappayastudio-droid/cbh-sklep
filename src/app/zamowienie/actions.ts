@@ -3,8 +3,8 @@
 import { redirect } from "next/navigation"
 
 import { sendOrderConfirmation } from "@/lib/email"
+import { grossFromNet } from "@/lib/format"
 import {
-  grossFromNet,
   isP24Configured,
   registerTransaction,
   gatewayUrl,
