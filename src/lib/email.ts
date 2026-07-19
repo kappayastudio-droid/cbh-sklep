@@ -35,6 +35,11 @@ type OrderConfirmationInput = {
   orderId: string
   customerName?: string
   items: OrderEmailItem[]
+  /** Wartość netto towarów przed rabatem (domyślnie = totalNet). */
+  subtotalNet?: number
+  discountPct?: number
+  discountAmount?: number
+  shippingNet?: number
   totalNet: number
 }
 
@@ -42,6 +47,10 @@ function renderOrderHtml({
   orderId,
   customerName,
   items,
+  subtotalNet,
+  discountPct = 0,
+  discountAmount = 0,
+  shippingNet = 0,
   totalNet,
 }: Omit<OrderConfirmationInput, "to">): string {
   const rows = items
@@ -79,10 +88,26 @@ function renderOrderHtml({
         <table style="width:100%;border-collapse:collapse;font-size:14px;">
           ${rows}
           <tr>
-            <td style="padding:14px 0 2px;color:#5c584f;">Razem netto</td>
+            <td style="padding:14px 0 2px;color:#5c584f;">Suma netto (towary)</td>
             <td style="padding:14px 0 2px;text-align:right;color:#5c584f;">${formatPriceNet(
-              totalNet
+              subtotalNet ?? totalNet
             )}</td>
+          </tr>
+          ${
+            discountPct > 0
+              ? `<tr>
+            <td style="padding:2px 0;color:#5c584f;">Rabat ${discountPct}%</td>
+            <td style="padding:2px 0;text-align:right;color:#5c584f;">−${formatPriceNet(
+              discountAmount
+            )}</td>
+          </tr>`
+              : ""
+          }
+          <tr>
+            <td style="padding:2px 0;color:#5c584f;">Dostawa</td>
+            <td style="padding:2px 0;text-align:right;color:#5c584f;">${
+              shippingNet > 0 ? formatPriceNet(shippingNet) : "gratis"
+            }</td>
           </tr>
           <tr>
             <td style="padding:2px 0;color:#5c584f;">VAT 23%</td>

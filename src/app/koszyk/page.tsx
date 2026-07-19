@@ -10,6 +10,7 @@ import { Section } from "@/components/ui/section"
 import { Typography } from "@/components/ui/typography"
 import { useCart } from "@/lib/cart/cart-context"
 import { formatPriceNet, grossFromNet, vatFromNet } from "@/lib/format"
+import { computeOrderTotals, nextThresholdHint } from "@/lib/pricing"
 
 export default function CartPage() {
   const { items, count, hydrated, setQty, removeItem, clear } = useCart()
@@ -20,6 +21,8 @@ export default function CartPage() {
     0
   )
   const allPriced = priced.length === items.length
+  const totals = computeOrderTotals(subtotalNet)
+  const hint = nextThresholdHint(subtotalNet)
 
   return (
     <>
@@ -178,24 +181,46 @@ export default function CartPage() {
                       Suma netto{!allPriced && " (pozycje z ceną)"}
                     </span>
                     <span className="tabular-nums">
-                      {formatPriceNet(subtotalNet)}
+                      {formatPriceNet(totals.subtotalNet)}
+                    </span>
+                  </div>
+                  {totals.discountPct > 0 && (
+                    <div className="mt-2xs flex items-baseline justify-between text-body2 text-[#787169]">
+                      <span>Rabat {totals.discountPct}%</span>
+                      <span className="tabular-nums">
+                        −{formatPriceNet(totals.discountAmount)}
+                      </span>
+                    </div>
+                  )}
+                  <div className="mt-2xs flex items-baseline justify-between text-body2">
+                    <span className="text-muted-foreground">Dostawa</span>
+                    <span className="tabular-nums">
+                      {totals.freeShipping
+                        ? "gratis"
+                        : formatPriceNet(totals.shippingNet)}
                     </span>
                   </div>
                   <div className="mt-2xs flex items-baseline justify-between text-body2">
                     <span className="text-muted-foreground">VAT 23%</span>
                     <span className="tabular-nums">
-                      {formatPriceNet(vatFromNet(subtotalNet))}
+                      {formatPriceNet(vatFromNet(totals.totalNet))}
                     </span>
                   </div>
                   <div className="mt-sm flex items-baseline justify-between border-t border-border pt-sm">
                     <span className="text-body2 font-medium">Do zapłaty (brutto)</span>
                     <span className="text-h6 font-semibold tabular-nums">
-                      {formatPriceNet(grossFromNet(subtotalNet))}
+                      {formatPriceNet(grossFromNet(totals.totalNet))}
                     </span>
                   </div>
+                  {hint && (
+                    <p className="mt-md rounded-md bg-surface-2 px-sm py-xs text-caption text-foreground">
+                      Dodaj towary za {formatPriceNet(hint.missing)}, aby
+                      otrzymać {hint.label}.
+                    </p>
+                  )}
                   <p className="mt-md text-caption text-muted-foreground">
-                    Płatność online (Przelewy24). Fakturę VAT wystawiamy do
-                    zamówienia.
+                    Dostawa 15 zł, darmowa od 300 zł. Rabat naliczany od wartości
+                    zamówienia. Płatność online (Przelewy24), faktura VAT.
                   </p>
                   <Button
                     size="lg"

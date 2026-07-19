@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 
 import { sendOrderConfirmation } from "@/lib/email"
 import { grossFromNet } from "@/lib/format"
+import { computeOrderTotals } from "@/lib/pricing"
 import {
   isP24Configured,
   registerTransaction,
@@ -132,10 +133,12 @@ export async function placeOrder(formData: FormData) {
     )
   }
 
-  const totalNet = lineItems.reduce(
+  // Wartość netto towarów → rabat progowy + koszt dostawy (autorytatywnie).
+  const subtotalNet = lineItems.reduce(
     (sum, li) => sum + li.unit_price_net * li.qty,
     0
   )
+  const totals = computeOrderTotals(subtotalNet)
 
   // Adres wysyłki
   const { data: address } = await supabase
@@ -157,7 +160,7 @@ export async function placeOrder(formData: FormData) {
     .insert({
       profile_id: user.id,
       status: "pending",
-      total_net: totalNet,
+      total_net: totals.totalNet,
       shipping_address_id: address?.id ?? null,
     })
     .select("id")
@@ -187,7 +190,7 @@ export async function placeOrder(formData: FormData) {
     try {
       token = await registerTransaction({
         sessionId: order.id,
-        amount: grossFromNet(totalNet),
+        amount: grossFromNet(totals.totalNet),
         email: user.email,
         description: `Zamówienie #${order.id.slice(0, 8)} — CBH Polska`,
         urlReturn: `${siteUrl()}/zamowienie/potwierdzenie?order=${order.id}`,
@@ -221,7 +224,11 @@ export async function placeOrder(formData: FormData) {
         qty: li.qty,
         unitPriceNet: li.unit_price_net,
       })),
-      totalNet,
+      subtotalNet: totals.subtotalNet,
+      discountPct: totals.discountPct,
+      discountAmount: totals.discountAmount,
+      shippingNet: totals.shippingNet,
+      totalNet: totals.totalNet,
     })
   }
 

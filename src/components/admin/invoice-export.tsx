@@ -5,6 +5,7 @@ import { Download } from "lucide-react"
 
 import type { AdminOrder } from "@/lib/admin"
 import { formatDate } from "@/lib/format"
+import { computeOrderTotals } from "@/lib/pricing"
 
 /**
  * Eksport danych do faktur — opłacone zamówienia, jeden wiersz na pozycję
@@ -44,14 +45,11 @@ export function InvoiceExport({ orders }: { orders: AdminOrder[] }) {
       ]
         .filter(Boolean)
         .join(", ")
+      const base = [o.id.slice(0, 8), formatDate(o.createdAt), o.customerCompany ?? "", o.nip ?? "", addr]
       for (const it of o.items) {
         rows.push(
           [
-            o.id.slice(0, 8),
-            formatDate(o.createdAt),
-            o.customerCompany ?? "",
-            o.nip ?? "",
-            addr,
+            ...base,
             it.name,
             it.qty,
             zl(it.unitPriceNet),
@@ -62,6 +60,22 @@ export function InvoiceExport({ orders }: { orders: AdminOrder[] }) {
             .join(";")
         )
       }
+      // Rabat i dostawa jako osobne pozycje (aby suma = wartość zamówienia).
+      const t = computeOrderTotals(
+        o.items.reduce((s, it) => s + it.unitPriceNet * it.qty, 0)
+      )
+      if (t.discountPct > 0) {
+        rows.push(
+          [...base, `Rabat ${t.discountPct}%`, 1, zl(-t.discountAmount), zl(-t.discountAmount), "23%"]
+            .map(cell)
+            .join(";")
+        )
+      }
+      rows.push(
+        [...base, "Dostawa", 1, zl(t.shippingNet), zl(t.shippingNet), "23%"]
+          .map(cell)
+          .join(";")
+      )
     }
     const csv = "﻿" + [header.map(cell).join(";"), ...rows].join("\r\n")
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" })

@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server"
 
 import { sendOrderConfirmation } from "@/lib/email"
 import { grossFromNet } from "@/lib/format"
+import { computeOrderTotals } from "@/lib/pricing"
 import { verifyNotificationSign, verifyTransaction } from "@/lib/p24"
 import { createAdminClient } from "@/lib/supabase/admin"
 
@@ -89,6 +90,11 @@ export async function POST(request: NextRequest) {
     ])
     const email = userRes?.user?.email
     if (email) {
+      const subtotalNet = (items ?? []).reduce(
+        (s, it) => s + it.unit_price_net * it.qty,
+        0
+      )
+      const totals = computeOrderTotals(subtotalNet)
       await sendOrderConfirmation({
         to: email,
         orderId: order.id,
@@ -100,6 +106,10 @@ export async function POST(request: NextRequest) {
           qty: it.qty,
           unitPriceNet: it.unit_price_net,
         })),
+        subtotalNet: totals.subtotalNet,
+        discountPct: totals.discountPct,
+        discountAmount: totals.discountAmount,
+        shippingNet: totals.shippingNet,
         totalNet: order.total_net,
       })
     }

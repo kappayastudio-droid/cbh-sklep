@@ -9,6 +9,7 @@ import {
   grossFromNet,
   vatFromNet,
 } from "@/lib/format"
+import { computeOrderTotals } from "@/lib/pricing"
 
 type Item = { name: string; qty: number; unitPriceNet: number }
 
@@ -29,8 +30,10 @@ type Props = {
 export function OrderInvoice(p: Props) {
   const [copied, setCopied] = React.useState(false)
 
-  const vat = vatFromNet(p.totalNet)
-  const gross = grossFromNet(p.totalNet)
+  const subtotal = p.items.reduce((s, it) => s + it.unitPriceNet * it.qty, 0)
+  const t = computeOrderTotals(subtotal)
+  const vat = vatFromNet(t.totalNet)
+  const gross = grossFromNet(t.totalNet)
 
   const text = [
     `Faktura — zamówienie #${p.orderRef} (${formatDate(p.dateISO)})`,
@@ -49,7 +52,11 @@ export function OrderInvoice(p: Props) {
         )} = ${formatPriceNet(it.unitPriceNet * it.qty)}`
     ),
     "",
-    `Suma netto: ${formatPriceNet(p.totalNet)}`,
+    `Suma netto (towary): ${formatPriceNet(t.subtotalNet)}`,
+    ...(t.discountPct > 0
+      ? [`Rabat ${t.discountPct}%: −${formatPriceNet(t.discountAmount)}`]
+      : []),
+    `Dostawa: ${t.freeShipping ? "gratis" : formatPriceNet(t.shippingNet)}`,
     `VAT 23%: ${formatPriceNet(vat)}`,
     `Do zapłaty (brutto): ${formatPriceNet(gross)}`,
   ].join("\n")
@@ -113,7 +120,16 @@ export function OrderInvoice(p: Props) {
         </table>
 
         <div className="mt-sm flex flex-col items-end gap-0.5 border-t border-border pt-sm text-caption">
-          <span>Netto: {formatPriceNet(p.totalNet)}</span>
+          <span>Suma netto (towary): {formatPriceNet(t.subtotalNet)}</span>
+          {t.discountPct > 0 && (
+            <span>
+              Rabat {t.discountPct}%: −{formatPriceNet(t.discountAmount)}
+            </span>
+          )}
+          <span>
+            Dostawa:{" "}
+            {t.freeShipping ? "gratis" : formatPriceNet(t.shippingNet)}
+          </span>
           <span>VAT 23%: {formatPriceNet(vat)}</span>
           <span className="text-body2 font-semibold text-foreground">
             Brutto: {formatPriceNet(gross)}

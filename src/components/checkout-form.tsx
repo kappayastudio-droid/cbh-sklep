@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Typography } from "@/components/ui/typography"
 import { useCart } from "@/lib/cart/cart-context"
 import { formatPriceNet, grossFromNet, vatFromNet } from "@/lib/format"
+import { computeOrderTotals } from "@/lib/pricing"
 
 const inputClass =
   "h-11 w-full appearance-none rounded-lg border border-border bg-background px-md text-body2 text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40"
@@ -43,6 +44,7 @@ export function CheckoutForm({ defaults }: { defaults: Defaults }) {
     (sum, i) => sum + (i.unitPriceNet ?? 0) * i.qty,
     0
   )
+  const totals = computeOrderTotals(subtotalNet)
   const itemsPayload = JSON.stringify(
     items.map((i) => ({
       slug: i.productSlug,
@@ -141,23 +143,39 @@ export function CheckoutForm({ defaults }: { defaults: Defaults }) {
 
         <div className="mt-md flex items-baseline justify-between text-body2">
           <span className="text-muted-foreground">Suma netto</span>
-          <span className="tabular-nums">{formatPriceNet(subtotalNet)}</span>
+          <span className="tabular-nums">
+            {formatPriceNet(totals.subtotalNet)}
+          </span>
+        </div>
+        {totals.discountPct > 0 && (
+          <div className="mt-2xs flex items-baseline justify-between text-body2 text-[#787169]">
+            <span>Rabat {totals.discountPct}%</span>
+            <span className="tabular-nums">
+              −{formatPriceNet(totals.discountAmount)}
+            </span>
+          </div>
+        )}
+        <div className="mt-2xs flex items-baseline justify-between text-body2">
+          <span className="text-muted-foreground">Dostawa</span>
+          <span className="tabular-nums">
+            {totals.freeShipping ? "gratis" : formatPriceNet(totals.shippingNet)}
+          </span>
         </div>
         <div className="mt-2xs flex items-baseline justify-between text-body2">
           <span className="text-muted-foreground">VAT 23%</span>
           <span className="tabular-nums">
-            {formatPriceNet(vatFromNet(subtotalNet))}
+            {formatPriceNet(vatFromNet(totals.totalNet))}
           </span>
         </div>
         <div className="mt-sm flex items-baseline justify-between border-t border-border pt-sm">
           <span className="text-body2 font-medium">Do zapłaty (brutto)</span>
           <span className="text-h6 font-semibold tabular-nums">
-            {formatPriceNet(grossFromNet(subtotalNet))}
+            {formatPriceNet(grossFromNet(totals.totalNet))}
           </span>
         </div>
 
         <p className="mt-sm text-caption text-muted-foreground">
-          Ceny netto, płatność brutto. Po złożeniu zamówienia przejdziesz do
+          Dostawa 15 zł, darmowa od 300 zł. Po złożeniu zamówienia przejdziesz do
           bezpiecznej płatności Przelewy24.
         </p>
 
