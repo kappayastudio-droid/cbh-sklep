@@ -16,6 +16,7 @@ import {
   getVisibleProducts,
 } from "@/lib/catalog"
 import { getSession } from "@/lib/auth"
+import { SITE_URL } from "@/lib/site"
 
 type PageProps = {
   params: Promise<{ slug: string }>
@@ -33,7 +34,15 @@ export async function generateMetadata({
   if (!product) return { title: "Produkt nie znaleziony" }
   return {
     title: `${product.name} — CBH Polska`,
-    description: product.shortDescription || undefined,
+    description: product.shortDescription || product.name,
+    alternates: { canonical: `/produkty/${product.slug}` },
+    openGraph: {
+      type: "website",
+      title: product.name,
+      description: product.shortDescription || undefined,
+      url: `/produkty/${product.slug}`,
+      images: product.image ? [{ url: product.image }] : undefined,
+    },
   }
 }
 
@@ -82,8 +91,28 @@ export default async function ProductPage({ params }: PageProps) {
   const priceMap = canSeePrices ? await getVariantPrices(variantIds) : {}
   const relatedPrices = canSeePrices ? await getListingPrices(related) : {}
 
+  // Dane strukturalne produktu (bez ceny — ceny są tylko dla zalogowanych B2B).
+  const productLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: product.image
+      ? [product.image.startsWith("http") ? product.image : SITE_URL + product.image]
+      : undefined,
+    description: product.shortDescription || product.name,
+    ...(product.brand
+      ? { brand: { "@type": "Brand", name: product.brand } }
+      : {}),
+    category: product.category,
+    sku: product.slug,
+  }
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }}
+      />
       <Section surface="background" innerClassName="flex flex-col gap-lg">
         {/* Breadcrumbs — powrót do strony głównej / kategorii */}
         <nav aria-label="Ścieżka nawigacji">

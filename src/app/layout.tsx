@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/footer"
 import { TopNav } from "@/components/layout/top-nav"
 import { getSession } from "@/lib/auth"
 import { getCategories } from "@/lib/catalog"
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site"
 import { Providers } from "@/app/providers"
 
 import "./globals.css"
@@ -22,9 +23,38 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "CBH Polska — Hurtownia B2B",
-  description:
-    "Sprzedaż hurtowa premium dla zarejestrowanych klientów B2B. Indywidualne wyceny, jasne warunki handlowe.",
+  metadataBase: new URL(SITE_URL),
+  title: "CBH Polska — Hurtownia kosmetyków fryzjerskich B2B",
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: [
+    "hurtownia fryzjerska",
+    "kosmetyki fryzjerskie hurt",
+    "Chenice",
+    "6 Zero",
+    "Color Clean",
+    "farby do włosów hurt",
+    "B2B",
+  ],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "pl_PL",
+    siteName: SITE_NAME,
+    url: SITE_URL,
+    title: "CBH Polska — Hurtownia kosmetyków fryzjerskich B2B",
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CBH Polska — Hurtownia kosmetyków fryzjerskich B2B",
+    description: SITE_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
 }
 
 export default async function RootLayout({
