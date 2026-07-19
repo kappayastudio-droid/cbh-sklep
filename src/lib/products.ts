@@ -3343,7 +3343,7 @@ export const ALL_PRODUCTS: Product[] = [
     "brand": "",
     "brandSlug": "",
     "shortDescription": "Profesjonalne nożyczki fryzjerskie ze stali nierdzewnej, rozmiar 5,5 cala.",
-    "description": "",
+    "description": "<p>Profesjonalne nożyczki fryzjerskie CBH w rozmiarze 5,5 cala — do strzyżenia i modelowania włosów w codziennej pracy salonu. Zapewniają precyzyjne cięcie i pewny chwyt.</p>",
     "image": "/produkty/placeholder-accessory.png",
     "images": [
       "/produkty/placeholder-accessory.png"
@@ -3367,7 +3367,7 @@ export const ALL_PRODUCTS: Product[] = [
     "brand": "",
     "brandSlug": "",
     "shortDescription": "Profesjonalne nożyczki fryzjerskie ze stali nierdzewnej, rozmiar 5,0 cala.",
-    "description": "",
+    "description": "<p>Profesjonalne nożyczki fryzjerskie CBH w rozmiarze 5,0 cala — do strzyżenia i modelowania włosów w codziennej pracy salonu. Zapewniają precyzyjne cięcie i pewny chwyt.</p>",
     "image": "/produkty/placeholder-accessory.png",
     "images": [
       "/produkty/placeholder-accessory.png"
@@ -3391,7 +3391,7 @@ export const ALL_PRODUCTS: Product[] = [
     "brand": "",
     "brandSlug": "",
     "shortDescription": "Szczotka do stylizacji i rozczesywania włosów.",
-    "description": "",
+    "description": "<p>Szczotka do włosów do rozczesywania, modelowania i wykończenia fryzury. Przydatna zarówno przy stylizacji w salonie, jak i w codziennej pielęgnacji.</p>",
     "image": "/produkty/placeholder-accessory.png",
     "images": [
       "/produkty/placeholder-accessory.png"
@@ -3415,7 +3415,7 @@ export const ALL_PRODUCTS: Product[] = [
     "brand": "",
     "brandSlug": "",
     "shortDescription": "Profesjonalna prostownica do włosów.",
-    "description": "",
+    "description": "<p>Profesjonalna prostownica do włosów — do prostowania i wygładzania oraz nadawania fryzurze gładkiego, lśniącego wykończenia.</p>",
     "image": "/produkty/placeholder-accessory.png",
     "images": [
       "/produkty/placeholder-accessory.png"
@@ -3439,7 +3439,7 @@ export const ALL_PRODUCTS: Product[] = [
     "brand": "",
     "brandSlug": "",
     "shortDescription": "Miseczka do mieszania farby i preparatów koloryzujących.",
-    "description": "",
+    "description": "<p>Plastikowa miseczka do przygotowywania i mieszania farby oraz preparatów koloryzujących. Podstawowe akcesorium przy koloryzacji w salonie.</p>",
     "image": "/produkty/placeholder-accessory.png",
     "images": [
       "/produkty/placeholder-accessory.png"
@@ -3463,7 +3463,7 @@ export const ALL_PRODUCTS: Product[] = [
     "brand": "",
     "brandSlug": "",
     "shortDescription": "Pędzelek do aplikacji farby i preparatów.",
-    "description": "",
+    "description": "<p>Pędzelek do nakładania farby i preparatów koloryzujących — umożliwia precyzyjną i równomierną aplikację podczas koloryzacji.</p>",
     "image": "/produkty/placeholder-accessory.png",
     "images": [
       "/produkty/placeholder-accessory.png"
@@ -3487,7 +3487,7 @@ export const ALL_PRODUCTS: Product[] = [
     "brand": "",
     "brandSlug": "",
     "shortDescription": "Jednorazowe pelerynki ochronne do zabiegów koloryzacji, opakowanie 30 szt.",
-    "description": "",
+    "description": "<p>Pelerynki ochronne w przezroczysto-białym kolorze, opakowanie 30 sztuk. Chronią odzież klienta podczas koloryzacji i innych zabiegów fryzjerskich.</p>",
     "image": "/produkty/placeholder-accessory.png",
     "images": [
       "/produkty/placeholder-accessory.png"
