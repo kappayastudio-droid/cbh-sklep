@@ -3190,8 +3190,8 @@ export const ALL_PRODUCTS: Product[] = [
     ],
     "brand": "",
     "brandSlug": "",
-    "shortDescription": "",
-    "description": "599Innowacja zaczyna się od wewnątrz: HY-PLEX to ekskluzywny zabieg, który rewolucjonizuje podejście do usług technicznych, rewitalizując włosy uszkodzone przez zabiegi chemiczne. Specjalna formuła z technologią HP2 oferuje włosom maksymalną ochronę przed i po usługach koloryzacji, rozjaśniania i trwałej ondulacji. Rezultat: miękkie włosy o niespotykanym blasku. Zestaw zawiera: 1 butelkę HY-PLEX No.1 (500 ml): Dodatek ochronny do usług technicznych 2 butelki HY-PLEX No.2 (500 ml): Wzmacniająca maska po zabiegu",
+    "shortDescription": "Zabieg wzmacniający HY-PLEX z technologią HP2 — chroni i odbudowuje włosy uszkodzone zabiegami chemicznymi. Zestaw: No.1 + 2× No.2 (500 ml).",
+    "description": "Innowacja zaczyna się od wewnątrz: HY-PLEX to ekskluzywny zabieg, który rewolucjonizuje podejście do usług technicznych, rewitalizując włosy uszkodzone przez zabiegi chemiczne. Specjalna formuła z technologią HP2 oferuje włosom maksymalną ochronę przed i po usługach koloryzacji, rozjaśniania i trwałej ondulacji. Rezultat: miękkie włosy o niespotykanym blasku. Zestaw zawiera: 1 butelkę HY-PLEX No.1 (500 ml): Dodatek ochronny do usług technicznych 2 butelki HY-PLEX No.2 (500 ml): Wzmacniająca maska po zabiegu",
     "image": "/produkty/6zero/263158_sei_punto_zero_hairzoe_restructuring_base_cream_500ml262991_sei_punto_zero_hy_plex_kit_2.png",
     "images": [
       "https://cbh-polska.pl/wp-content/uploads/2026/02/263158_sei_punto_zero_hairzoe_restructuring_base_cream_500ml262991_sei_punto_zero_hy_plex_kit_2.png"
