@@ -3319,7 +3319,7 @@ export const ALL_PRODUCTS: Product[] = [
     "brand": "Chenice",
     "brandSlug": "chenice",
     "shortDescription": "Zestaw KeraBond: maska odbudowująca i olejek multiwitaminowy do włosów suchych i zniszczonych.",
-    "description": "",
+    "description": "<p><strong>KeraBond Box</strong> to profesjonalny zestaw do intensywnej odbudowy włosów suchych i zniszczonych — po koloryzacji, rozjaśnianiu i innych zabiegach chemicznych. Produkty działają etapami, uzupełniając się nawzajem:</p><ul><li><strong>Szampon Hydro-Keratin</strong> — oczyszcza i przygotowuje strukturę włosa; aktywowana keratyna i składniki nawilżające przywracają elastyczność, redukują łamliwość i puszenie.</li><li><strong>Maska Kerabonding</strong> — głęboko odbudowuje mostki keratynowe dzięki technologii Liposom® i aktywnym aminokwasom, wypełnia ubytki keratyny i przywraca równowagę pH.</li><li><strong>Olejek Multi-Vitamin</strong> — skoncentrowany kompleks witamin i minerałów w technologii liposomowej; chroni końcówki przed łamaniem i rozdwajaniem, intensywnie nawilża i nabłyszcza.</li></ul><p>Efekt: wyraźnie mocniejsze, elastyczne i pełne blasku włosy.</p>",
     "image": "/produkty/KerabondHydroKeratinSet.png",
     "images": [
       "/produkty/KerabondHydroKeratinSet.png"
