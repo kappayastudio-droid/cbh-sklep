@@ -119,9 +119,10 @@ export type AdminOrder = {
   customerCompany: string | null
   address: string | null
   items: AdminOrderItem[]
-  /** Dane do nadania w DPD. */
+  /** Dane do nadania w DPD / do faktury. */
   recipientName: string | null
   phone: string | null
+  nip: string | null
   addr: {
     line1: string
     line2: string | null
@@ -156,7 +157,7 @@ export async function adminListOrders(): Promise<AdminOrder[]> {
         .in("order_id", orderIds),
       supabase
         .from("profiles")
-        .select("id, company_name, phone")
+        .select("id, company_name, phone, nip")
         .in("id", profileIds),
       addressIds.length
         ? supabase
@@ -182,6 +183,9 @@ export async function adminListOrders(): Promise<AdminOrder[]> {
   )
   const phoneById = new Map(
     (profiles ?? []).map((p) => [p.id, (p as { phone?: string }).phone ?? null])
+  )
+  const nipById = new Map(
+    (profiles ?? []).map((p) => [p.id, (p as { nip?: string }).nip ?? null])
   )
   const addressById = new Map(
     (addresses ?? []).map((a) => [
@@ -228,6 +232,7 @@ export async function adminListOrders(): Promise<AdminOrder[]> {
       items,
       recipientName: nameById.get(o.profile_id) ?? null,
       phone: phoneById.get(o.profile_id) ?? null,
+      nip: nipById.get(o.profile_id) ?? null,
       addr: o.shipping_address_id
         ? (addrPartsById.get(o.shipping_address_id) ?? null)
         : null,

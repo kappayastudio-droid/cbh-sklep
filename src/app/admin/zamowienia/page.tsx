@@ -1,5 +1,7 @@
 import { setOrderStatus } from "@/app/admin/actions"
 import { DpdExport } from "@/components/admin/dpd-export"
+import { InvoiceExport } from "@/components/admin/invoice-export"
+import { OrderInvoice } from "@/components/admin/order-invoice"
 import { OrderShipping } from "@/components/admin/order-shipping"
 import { Button } from "@/components/ui/button"
 import { Typography } from "@/components/ui/typography"
@@ -30,7 +32,10 @@ export default async function AdminOrdersPage() {
         <Typography variant="body2" className="text-muted-foreground">
           {orders.length} {orders.length === 1 ? "zamówienie" : "zamówień"}.
         </Typography>
-        <DpdExport orders={orders} />
+        <div className="flex flex-wrap gap-sm">
+          <InvoiceExport orders={orders} />
+          <DpdExport orders={orders} />
+        </div>
       </div>
 
       {orders.map((o) => (
@@ -86,6 +91,19 @@ export default async function AdminOrdersPage() {
               </p>
             )
           )}
+
+          <OrderInvoice
+            orderRef={o.id.slice(0, 8)}
+            dateISO={o.createdAt}
+            company={o.customerCompany}
+            nip={o.nip}
+            line1={o.addr?.line1 ?? ""}
+            line2={o.addr?.line2 ?? null}
+            postalCode={o.addr?.postalCode ?? ""}
+            city={o.addr?.city ?? ""}
+            items={o.items}
+            totalNet={o.totalNet}
+          />
 
           {/* Zmiana statusu */}
           <form
