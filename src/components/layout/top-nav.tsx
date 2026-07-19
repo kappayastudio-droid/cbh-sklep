@@ -264,7 +264,7 @@ export function TopNav({
           </SheetTrigger>
           <SheetContent side="right" className="w-[300px] sm:w-[340px]">
             <SheetTitle className="sr-only">Menu</SheetTitle>
-            <div className="flex flex-col gap-lg px-md pt-lg">
+            <div className="flex max-h-[100dvh] flex-col gap-lg overflow-y-auto px-md pb-2xl pt-lg">
               {/* Wyszukiwarka mobilna */}
               <form onSubmit={handleSearch} role="search" className="relative flex items-center">
                 <input
@@ -283,6 +283,60 @@ export function TopNav({
                   <Search className="size-4" />
                 </button>
               </form>
+
+              {/* Konto / Panel — u góry, zawsze dostępne (bez przewijania) */}
+              <div className="flex flex-col gap-sm">
+                {isAuthenticated ? (
+                  <>
+                    {isAdmin && (
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        render={
+                          <Link href="/admin/ceny" onClick={() => setOpen(false)} />
+                        }
+                      >
+                        Panel
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      render={<Link href="/konto" onClick={() => setOpen(false)} />}
+                    >
+                      Moje konto
+                    </Button>
+                    <form action={logout}>
+                      <Button
+                        type="submit"
+                        variant="outline"
+                        size="lg"
+                        className="w-full"
+                      >
+                        Wyloguj
+                      </Button>
+                    </form>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      render={<Link href="/login" onClick={() => setOpen(false)} />}
+                    >
+                      Zaloguj się
+                    </Button>
+                    <Button
+                      size="lg"
+                      render={
+                        <Link href="/rejestracja" onClick={() => setOpen(false)} />
+                      }
+                    >
+                      Zarejestruj
+                    </Button>
+                  </>
+                )}
+              </div>
 
               {/* Kategorie */}
               <nav className="flex flex-col gap-sm" aria-label="Kategorie">
@@ -316,59 +370,6 @@ export function TopNav({
                   </Link>
                 ))}
               </nav>
-
-              <div className="mt-sm flex flex-col gap-sm">
-                {isAuthenticated ? (
-                  <>
-                    {isAdmin && (
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        render={
-                          <Link href="/admin/ceny" onClick={() => setOpen(false)} />
-                        }
-                      >
-                        Panel
-                      </Button>
-                    )}
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      render={
-                        <Link href="/konto" onClick={() => setOpen(false)} />
-                      }
-                    >
-                      Moje konto
-                    </Button>
-                    <form action={logout}>
-                      <Button
-                        type="submit"
-                        variant="outline"
-                        size="lg"
-                        className="w-full"
-                      >
-                        Wyloguj
-                      </Button>
-                    </form>
-                  </>
-                ) : (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      render={<Link href="/login" onClick={() => setOpen(false)} />}
-                    >
-                      Zaloguj się
-                    </Button>
-                    <Button
-                      size="lg"
-                      render={<Link href="/rejestracja" onClick={() => setOpen(false)} />}
-                    >
-                      Zarejestruj
-                    </Button>
-                  </>
-                )}
-              </div>
             </div>
           </SheetContent>
         </Sheet>

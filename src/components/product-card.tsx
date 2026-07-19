@@ -21,6 +21,8 @@ export type ProductCardProps = {
   shortDescription: string
   /** Cena (string sformatowany, np. "35,00 zł"). Wyświetlana tylko gdy isAuthenticated. */
   price: string
+  /** Cena sprzed promocji (przekreślona) — opcjonalnie, tylko gdy isAuthenticated. */
+  oldPrice?: string
   /** Stan zalogowania użytkownika. Domyślnie false → login-gated CTA. */
   isAuthenticated?: boolean
   className?: string
@@ -33,6 +35,7 @@ export function ProductCard({
   name,
   shortDescription,
   price,
+  oldPrice,
   isAuthenticated = false,
   className,
 }: ProductCardProps) {
@@ -82,9 +85,16 @@ export function ProductCard({
 
         {isAuthenticated ? (
           <>
-            <Typography variant="subtitle1" className="mt-auto pt-sm font-semibold">
-              {price || "Cena na zapytanie"}
-            </Typography>
+            <div className="mt-auto flex items-baseline gap-2xs pt-sm">
+              {oldPrice && (
+                <span className="text-caption text-muted-foreground line-through">
+                  {oldPrice}
+                </span>
+              )}
+              <Typography variant="subtitle1" as="span" className="font-semibold">
+                {price || "Cena na zapytanie"}
+              </Typography>
+            </div>
             <Button
               size="lg"
               className="mt-md w-full justify-between bg-primary font-medium text-primary-foreground hover:bg-primary/90"

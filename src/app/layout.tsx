@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Fraunces, Inter } from "next/font/google"
 
+import { CookieConsent } from "@/components/cookie-consent"
 import { Footer } from "@/components/layout/footer"
 import { TopNav } from "@/components/layout/top-nav"
 import { getSession } from "@/lib/auth"
@@ -81,6 +82,7 @@ export default async function RootLayout({
           />
           <main className="flex-1">{children}</main>
           <Footer />
+          <CookieConsent />
         </Providers>
       </body>
     </html>
