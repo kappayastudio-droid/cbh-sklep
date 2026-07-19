@@ -115,13 +115,16 @@ export function Footer() {
               Kontakt
             </h2>
             <ul className="flex flex-col gap-xs text-[14px] text-[#d9d6c9]">
-              <li>
+              <li className="text-white/85">Chenice System Polska</li>
+              <li>ul. Meissnera 47</li>
+              <li>60-408 Poznań</li>
+              <li>NIP: 7771134877</li>
+              <li>REGON: 631006741</li>
+              <li className="pt-2xs">
                 <a href="mailto:chenice@list.pl" className="hover:text-white">
                   chenice@list.pl
                 </a>
               </li>
-              <li>ul. Meissnera 47</li>
-              <li>60-408 Poznań</li>
               <li>
                 <a href="tel:+48601715751" className="hover:text-white">
                   +48 601 715 751
