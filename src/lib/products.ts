@@ -3295,7 +3295,7 @@ export const ALL_PRODUCTS: Product[] = [
     "brand": "Chenice",
     "brandSlug": "chenice",
     "shortDescription": "Kuracja bottox w pojedynczej fiolce 50 ml. Głębokie nawilżenie i wygładzenie włosów.",
-    "description": "",
+    "description": "<p>Specjalistyczny balsam bogaty w składniki aktywne (ceramidy, keratyna, kolagen roślinny, kwas hialuronowy, olej pistacjowy). Odbudowuje i rewitalizuje włosy dzięki synergicznemu działaniu, tworząc efekt „bottox”: nadaje włosom blask, odżywia łodygę włosa, dzięki czemu wyglądają na pełniejsze i bogatsze.</p><p><strong>Uwaga:</strong> produkt krystalizuje się w temperaturze poniżej 15°C — proces jest odwracalny. Zanurz fiolkę w misce z gorącą wodą na kilka minut, aż preparat się rozpuści i stanie przezroczysty.</p>",
     "image": "/produkty/BottoxSet.png",
     "images": [
       "/produkty/BottoxSet.png"
