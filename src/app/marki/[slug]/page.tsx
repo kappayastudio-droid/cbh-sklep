@@ -6,6 +6,9 @@ import { PageBanner } from "@/components/layout/page-banner"
 import { Section } from "@/components/ui/section"
 import { getBrands, getListingPrices, getProductsByBrand } from "@/lib/catalog"
 import { getSession } from "@/lib/auth"
+import { breadcrumbLd } from "@/lib/jsonld"
+import { brandIntro } from "@/lib/seo-intros"
+import { Typography } from "@/components/ui/typography"
 
 type PageProps = {
   params: Promise<{ slug: string }>
@@ -28,7 +31,18 @@ export async function generateMetadata({
   const { slug } = await params
   const brand = (await getBrands()).find((b) => b.slug === slug)
   if (!brand) return { title: "Marka nie znaleziona" }
-  return { title: `${brand.name} — CBH Polska` }
+  const intro = brandIntro(slug, brand.name)
+  return {
+    title: `${brand.name} — CBH Polska`,
+    description: intro,
+    alternates: { canonical: `/marki/${slug}` },
+    openGraph: {
+      type: "website",
+      title: `${brand.name} — CBH Polska`,
+      description: intro,
+      url: `/marki/${slug}`,
+    },
+  }
 }
 
 export default async function BrandPage({ params }: PageProps) {
@@ -40,9 +54,19 @@ export default async function BrandPage({ params }: PageProps) {
   const session = await getSession()
   const canSeePrices = session.isApproved
   const prices = canSeePrices ? await getListingPrices(products) : {}
+  const intro = brandIntro(slug, brand.name)
+  const crumbsLd = breadcrumbLd([
+    { name: "Strona główna", path: "/" },
+    { name: "Sklep", path: "/sklep" },
+    { name: brand.name, path: `/marki/${slug}` },
+  ])
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbsLd) }}
+      />
       <PageBanner
         title={brand.name}
         image={BRAND_BANNER[slug]}
@@ -53,6 +77,12 @@ export default async function BrandPage({ params }: PageProps) {
         ]}
       />
       <Section surface="background" className="lg:!pt-10">
+        <Typography
+          variant="body1"
+          className="mb-lg max-w-[46rem] text-muted-foreground"
+        >
+          {intro}
+        </Typography>
         <BrandProducts
           products={products}
           prices={prices}

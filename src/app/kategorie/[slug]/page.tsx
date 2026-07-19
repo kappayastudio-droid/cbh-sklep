@@ -12,6 +12,8 @@ import {
   getProductsByCategory,
 } from "@/lib/catalog"
 import { getSession } from "@/lib/auth"
+import { breadcrumbLd } from "@/lib/jsonld"
+import { categoryIntro } from "@/lib/seo-intros"
 
 type PageProps = {
   params: Promise<{ slug: string }>
@@ -27,7 +29,18 @@ export async function generateMetadata({
   const { slug } = await params
   const category = (await getCategories()).find((c) => c.slug === slug)
   if (!category) return { title: "Kategoria nie znaleziona" }
-  return { title: `${category.name} — CBH Polska` }
+  const intro = categoryIntro(slug, category.name)
+  return {
+    title: `${category.name} — CBH Polska`,
+    description: intro,
+    alternates: { canonical: `/kategorie/${slug}` },
+    openGraph: {
+      type: "website",
+      title: `${category.name} — CBH Polska`,
+      description: intro,
+      url: `/kategorie/${slug}`,
+    },
+  }
 }
 
 export default async function CategoryPage({ params }: PageProps) {
@@ -39,9 +52,19 @@ export default async function CategoryPage({ params }: PageProps) {
   const session = await getSession()
   const canSeePrices = session.isApproved
   const prices = canSeePrices ? await getListingPrices(products) : {}
+  const intro = categoryIntro(slug, category.name)
+  const crumbsLd = breadcrumbLd([
+    { name: "Strona główna", path: "/" },
+    { name: "Sklep", path: "/sklep" },
+    { name: category.name, path: `/kategorie/${slug}` },
+  ])
 
   return (
     <Section surface="background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbsLd) }}
+      />
       {/* Breadcrumbs */}
       <nav aria-label="Ścieżka nawigacji" className="mb-lg">
         <ol className="flex flex-wrap items-center gap-2xs text-caption text-muted-foreground">
@@ -63,11 +86,14 @@ export default async function CategoryPage({ params }: PageProps) {
         </ol>
       </nav>
 
-      <header className="mb-xl flex flex-col gap-2xs">
+      <header className="mb-xl flex flex-col gap-sm">
         <Typography variant="h3" as="h1">
           {category.name}
         </Typography>
-        <Typography variant="body2" className="text-muted-foreground">
+        <Typography variant="body1" className="max-w-[46rem] text-muted-foreground">
+          {intro}
+        </Typography>
+        <Typography variant="caption" className="text-muted-foreground">
           {products.length} produktów
         </Typography>
       </header>

@@ -16,6 +16,7 @@ import {
   getVisibleProducts,
 } from "@/lib/catalog"
 import { getSession } from "@/lib/auth"
+import { breadcrumbLd } from "@/lib/jsonld"
 import { SITE_URL } from "@/lib/site"
 
 type PageProps = {
@@ -107,11 +108,20 @@ export default async function ProductPage({ params }: PageProps) {
     sku: product.slug,
   }
 
+  const crumbsLd = breadcrumbLd([
+    { name: "Strona główna", path: "/" },
+    { name: "Sklep", path: "/sklep" },
+    { name: product.category, path: `/kategorie/${product.categorySlug}` },
+    { name: product.name, path: `/produkty/${product.slug}` },
+  ])
+
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([productLd, crumbsLd]),
+        }}
       />
       <Section surface="background" innerClassName="flex flex-col gap-lg">
         {/* Breadcrumbs — powrót do strony głównej / kategorii */}

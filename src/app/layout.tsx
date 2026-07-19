@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Fraunces, Inter } from "next/font/google"
 
 import { CookieConsent } from "@/components/cookie-consent"
@@ -56,6 +56,10 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
+}
+
+export const viewport: Viewport = {
+  themeColor: "#787169",
 }
 
 export default async function RootLayout({
