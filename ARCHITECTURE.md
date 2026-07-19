@@ -222,17 +222,32 @@ Ceny w groszach (`integer`) żeby uniknąć błędów zmiennoprzecinkowych; **ne
 - [x] `placeOrder` — **re-kalkulacja cen na serwerze** (RPC `variant_prices`, nie ufamy
       koszykowi z przeglądarki), walidacja dostępności, zapis `addresses`/`orders`/`order_items`
 - [x] `/zamowienie/potwierdzenie` — podziękowanie + wyczyszczenie koszyka
-- [ ] Płatność/status opłacenia + mail potwierdzający — Faza 5 (P24 wstrzymane, patrz notatki)
+- [x] Płatność/status opłacenia + mail potwierdzający — Faza 5 (P24 działa w sandbox; live przed startem)
 
 ### Faza 5 — Płatności → mail
 - [x] `pnpm add resend`
 - [x] `src/lib/email.ts` — `sendOrderConfirmation` (no-op bez `RESEND_API_KEY`, nigdy nie rzuca)
 - [x] Mail potwierdzający zamówienie wpięty w `placeOrder` (best-effort, nie blokuje zamówienia)
-- [ ] **[USER/PROD]** Ustawić `RESEND_API_KEY` + `RESEND_FROM` (zweryfikowana domena) — inaczej mail jest pomijany
-- [ ] Route handler: rejestracja transakcji P24 (`/api/p24/register`) — **wstrzymane** (login P24 od właściciela)
-- [ ] Webhook P24 (`/api/p24/webhook`) — **weryfikacja sygnatury `P24_CRC`**, idempotencja
-- [ ] Po `paid`: mail o opłaceniu (Resend). **Faktury NIE wystawia sklep** — robi to program KSeF właściciela
-- [ ] Obsługa błędów/retry (webhook może przyjść wielokrotnie)
+- [x] `src/lib/p24.ts` — register/verify + weryfikacja podpisu CRC (SHA-384); bezpiecznik sandbox
+- [x] `placeOrder` — rejestracja transakcji + redirect na bramkę; fallback bez P24
+- [x] Webhook `/api/p24/webhook` — weryfikacja podpisu → `verify` → status `paid` → mail (idempotentnie)
+- [x] **Zweryfikowane end-to-end w SANDBOX** (2026-07-17): zamówienie → bramka → webhook → `paid`
+- [x] Rozbicie VAT (netto / VAT 23% / brutto) w koszyku, checkout i mailu; do P24 idzie BRUTTO
+- [ ] **[USER/PROD]** `RESEND_API_KEY` + `RESEND_FROM` (zweryfikowana domena) — inaczej nasz mail pomijany
+- [ ] **[USER/PROD]** P24 LIVE: `P24_SANDBOX=false` + produkcyjne klucze + URL-e w panelu P24 live
+- [ ] Po `paid`: mail o opłaceniu. **Faktury NIE wystawia sklep** — robi to program KSeF właściciela
+
+### Faza 5b — Wysyłka DPD (nadawanie ręczne)
+- [x] `src/lib/shipping-weight.ts` — szacowanie wagi paczki z ml/g (+ opakowanie), fallback akcesoriów
+- [x] `/admin/zamowienia` — karta „Wysyłka DPD": dane odbiorcy + waga + przycisk Kopiuj
+- [x] Eksport CSV zamówień do wysyłki
+- [ ] (opcjonalnie, przyszłość) pełna integracja DPD API / broker → etykieta PDF z panelu
+
+### Faza 5c — SEO
+- [x] Metadane bazowe (metadataBase, OpenGraph, Twitter, robots), `src/lib/site.ts`
+- [x] `app/sitemap.ts`, `app/robots.ts`, `app/opengraph-image.tsx`
+- [x] JSON-LD: Organization + WebSite (home), Product (strony produktów); canonical + OG per produkt
+- [ ] **[USER/PROD]** Zgłosić sitemapę w Google Search Console (po podpięciu domeny)
 
 ### Faza 6 — Panel administracyjny
 - [x] Layout `/admin` chroniony rolą `admin` (`requireAdmin` → redirect; gość dostaje 307)
@@ -240,15 +255,42 @@ Ceny w groszach (`integer`) żeby uniknąć błędów zmiennoprzecinkowych; **ne
 - [x] `/admin/klienci` — lista kont + zatwierdzanie/cofanie (`is_approved`)
 - [x] Link „Panel" w nawigacji dla admina
 - [x] `/admin/zamowienia` — lista zamówień (klient, pozycje, adres, suma) + zmiana statusu
-- [x] Konto klienta `/konto` — dane + historia zamówień (własne, przez RLS) + link w nawigacji
+- [x] Konto klienta `/konto` — pełne dane z rejestracji (w tym adres) + EDYCJA (imię, telefon, firma, adres) + historia zamówień
+- [x] Auto-promocja właściciela na admina przy rejestracji (`BOOTSTRAP_ADMINS` / env `ADMIN_EMAILS`)
 - [ ] Przypisywanie `price_list_id` (cenniki/rabaty) — kolejna iteracja
 - [ ] Edycja produktów (nazwa/opis/zdjęcia), (opcjonalnie) `customer_prices`
 
-### Faza 7 — Produkcja
-- [ ] Zmienne środowiskowe na Vercel
-- [ ] P24 tryb produkcyjny + poprawny URL webhooka
-- [ ] Domena, e-mail nadawcy w Resend (weryfikacja DNS)
-- [ ] Testy: rejestracja → akceptacja → zakup → płatność → faktura → mail (end-to-end)
+### Faza 7 — Przed produkcją (checklista startowa)
+
+**Treść (uzupełnia właścicielka — patrz `TRESC-DO-UZUPELNIENIA.md`):**
+- [ ] 10 zdjęć: 7 akcesoriów + Karta kolorów Botanical + Hairzoe Cream 500ml + Hy-Plex zestaw
+- [ ] 10 opisów pełnych + 1 krótki (Hy-Plex)
+- [ ] Kategoria: Kerabond Summer Shiny Body krem 150ml → wyjąć z „Inne"
+- [x] Ceny — komplet (0 wariantów z ceną 0)
+
+**Płatności / maile (tryb live):**
+- [ ] P24 LIVE: `P24_SANDBOX=false` + produkcyjne CRC/API (ze starego WordPressa) + URL-e w panelu P24 live
+- [ ] Resend: `RESEND_API_KEY` + zweryfikowana domena nadawcy (np. `@chenice.pl`)
+- [ ] Szablony maili Supabase po polsku (gotowy HTML: `Downloads/maile-supabase.txt`)
+- [ ] Supabase → URL Configuration: dodać produkcyjną domenę (Site URL + Redirect URLs)
+
+**Domena / hosting:**
+- [ ] Podpiąć docelową domenę do Vercela (DNS) + `NEXT_PUBLIC_SITE_URL` = ta domena
+- [ ] Plan Vercel (użycie komercyjne = Pro) lub alternatywa (Netlify)
+
+**Prawne / zaufanie:**
+- [ ] Dane firmy: **NIP + pełna nazwa** w stopce/regulaminie (obecnie tylko adres/tel/e-mail)
+- [ ] Przegląd Regulaminu i Polityki prywatności pod kątem B2B (potwierdzić z prawnikiem/księgową)
+- [ ] Cookies/zgoda — tylko jeśli dojdzie analityka (GA/Pixel)
+
+**Porządki + QA:**
+- [ ] Wyczyścić testowe zamówienia z bazy
+- [ ] Zatwierdzić realne konta klientów (`is_approved`)
+- [ ] Test end-to-end na koncie zwykłego klienta: rejestracja → akceptacja → zakup → płatność LIVE → mail
+- [ ] Ostatni przegląd mobile
+
+**SEO (po starcie):**
+- [ ] Zgłosić sitemapę w Google Search Console
 
 ---
 
