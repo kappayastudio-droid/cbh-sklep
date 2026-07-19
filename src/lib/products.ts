@@ -3271,7 +3271,7 @@ export const ALL_PRODUCTS: Product[] = [
     "brand": "Chenice",
     "brandSlug": "chenice",
     "shortDescription": "Regenerujący olejek arganowy do włosów suchych i zniszczonych. Nabłyszcza i wygładza bez obciążania.",
-    "description": "",
+    "description": "<p>Chenice Beverly Hills Argan Complex to wszechstronna, lekka kuracja do włosów na bazie organicznego olejku arganowego, organicznego oleju lnianego oraz technologii ciekłych kryształów — dla blasku, miękkości i łatwiejszego układania.</p><p>Zaprojektowana do wielu zastosowań, ta zaawansowana formuła wygładza włosy, poprawia ich strukturę i nadaje dopracowane, świetliste wykończenie, nie obciążając ich. Idealna do wszystkich rodzajów włosów — pozostawia je jedwabiste, odżywione i naturalnie promienne.</p><p><strong>Kluczowe korzyści:</strong></p><ul><li>podkreśla blask i miękkość,</li><li>lekka, nietłusta formuła,</li><li>wygładza i pomaga kontrolować puszenie,</li><li>ułatwia układanie,</li><li>formuła wielozadaniowa — efekt dopasowany do potrzeb,</li><li>odpowiednia do wszystkich rodzajów włosów.</li></ul>",
     "image": "/produkty/ArganComplex.png",
     "images": [
       "/produkty/ArganComplex.png"
