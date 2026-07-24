@@ -1,0 +1,6 @@
+[build]
+  command = "next build"
+
+# Wymusza runtime Next.js na Netlify (SSR, server actions, API routes).
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
