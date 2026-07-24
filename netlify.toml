@@ -1,5 +1,6 @@
 [build]
   command = "next build"
+  publish = ".next"
 
 # Wymusza runtime Next.js na Netlify (SSR, server actions, API routes).
 [[plugins]]
