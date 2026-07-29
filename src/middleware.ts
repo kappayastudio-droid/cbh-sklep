@@ -25,7 +25,8 @@ export async function middleware(request: NextRequest) {
     const allowed =
       pathname === "/wkrotce" ||
       pathname.startsWith("/api") ||
-      pathname.startsWith("/_next")
+      pathname.startsWith("/_next") ||
+      pathname.startsWith("/.well-known") // ACME / weryfikacja certyfikatu SSL
 
     if (!allowed && !hasBypassCookie) {
       const url = request.nextUrl.clone()
