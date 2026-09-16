@@ -75,23 +75,31 @@ export type AdminCustomer = {
   role: string
   isApproved: boolean
   createdAt: string
+  /** Przypisany cennik rabatowy (null = ceny bazowe, bez rabatu). */
+  priceListId: string | null
+  priceListName: string | null
+  discountPct: number
 }
 
-/** Lista klientów (auth.users + profiles) — do zatwierdzania w panelu. */
+/** Lista klientów (auth.users + profiles) — do zatwierdzania i rabatów w panelu. */
 export async function adminListCustomers(): Promise<AdminCustomer[]> {
   const supabase = createAdminClient()
-  const [{ data: usersData }, { data: profiles }] = await Promise.all([
-    supabase.auth.admin.listUsers(),
-    supabase.from("profiles").select("id, role, is_approved, company_name"),
-  ])
+  const [{ data: usersData }, { data: profiles }, { data: lists }] =
+    await Promise.all([
+      supabase.auth.admin.listUsers(),
+      supabase
+        .from("profiles")
+        .select("id, role, is_approved, company_name, price_list_id"),
+      supabase.from("price_lists").select("id, name, discount_pct"),
+    ])
 
-  const profileById = new Map(
-    (profiles ?? []).map((p) => [p.id, p])
-  )
+  const profileById = new Map((profiles ?? []).map((p) => [p.id, p]))
+  const listById = new Map((lists ?? []).map((l) => [l.id, l]))
 
   return (usersData?.users ?? [])
     .map((u) => {
       const p = profileById.get(u.id)
+      const list = p?.price_list_id ? listById.get(p.price_list_id) : undefined
       return {
         id: u.id,
         email: u.email ?? "—",
@@ -99,9 +107,45 @@ export async function adminListCustomers(): Promise<AdminCustomer[]> {
         role: p?.role ?? "customer",
         isApproved: Boolean(p?.is_approved),
         createdAt: u.created_at,
+        priceListId: p?.price_list_id ?? null,
+        priceListName: list?.name ?? null,
+        discountPct: Number(list?.discount_pct ?? 0),
       }
     })
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+}
+
+export type AdminPriceList = {
+  id: string
+  name: string
+  discountPct: number
+  /** Ilu klientów korzysta z tego cennika — ostrzeżenie przed usunięciem. */
+  customerCount: number
+}
+
+/** Cenniki rabatowe wraz z liczbą przypisanych klientów (najwyższy rabat pierwszy). */
+export async function adminListPriceLists(): Promise<AdminPriceList[]> {
+  const supabase = createAdminClient()
+  const [{ data: lists }, { data: profiles }] = await Promise.all([
+    supabase
+      .from("price_lists")
+      .select("id, name, discount_pct")
+      .order("discount_pct", { ascending: false }),
+    supabase.from("profiles").select("price_list_id"),
+  ])
+
+  const countById = new Map<string, number>()
+  for (const p of profiles ?? []) {
+    if (!p.price_list_id) continue
+    countById.set(p.price_list_id, (countById.get(p.price_list_id) ?? 0) + 1)
+  }
+
+  return (lists ?? []).map((l) => ({
+    id: l.id,
+    name: l.name,
+    discountPct: Number(l.discount_pct),
+    customerCount: countById.get(l.id) ?? 0,
+  }))
 }
 
 export type AdminOrderItem = {

@@ -1,12 +1,16 @@
 import { setCustomerApproval } from "@/app/admin/actions"
+import { CustomerDiscount } from "@/components/admin/customer-discount"
 import { Button } from "@/components/ui/button"
 import { Typography } from "@/components/ui/typography"
-import { adminListCustomers } from "@/lib/admin"
+import { adminListCustomers, adminListPriceLists } from "@/lib/admin"
 
 export const dynamic = "force-dynamic"
 
 export default async function AdminCustomersPage() {
-  const customers = await adminListCustomers()
+  const [customers, priceLists] = await Promise.all([
+    adminListCustomers(),
+    adminListPriceLists(),
+  ])
   const pending = customers.filter((c) => !c.isApproved && c.role !== "admin")
 
   return (
@@ -17,6 +21,13 @@ export default async function AdminCustomersPage() {
           : "Brak kont oczekujących na zatwierdzenie."}
       </Typography>
 
+      {priceLists.length === 0 && (
+        <Typography variant="body2" className="text-muted-foreground">
+          Nie masz jeszcze żadnego cennika rabatowego — dodaj go w zakładce
+          „Rabaty”, żeby móc przypisywać klientom indywidualne rabaty.
+        </Typography>
+      )}
+
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-body2">
           <thead>
@@ -24,6 +35,7 @@ export default async function AdminCustomersPage() {
               <th className="py-sm pr-md font-medium text-muted-foreground">E-mail</th>
               <th className="py-sm pr-md font-medium text-muted-foreground">Firma</th>
               <th className="py-sm pr-md font-medium text-muted-foreground">Status</th>
+              <th className="py-sm pr-md font-medium text-muted-foreground">Rabat</th>
               <th className="py-sm font-medium text-muted-foreground">Akcja</th>
             </tr>
           </thead>
@@ -47,6 +59,17 @@ export default async function AdminCustomersPage() {
                     <span className="rounded-full border border-border px-2 py-0.5 text-caption text-muted-foreground">
                       oczekuje
                     </span>
+                  )}
+                </td>
+                <td className="py-sm pr-md">
+                  {c.role === "admin" ? (
+                    <span className="text-muted-foreground">—</span>
+                  ) : (
+                    <CustomerDiscount
+                      profileId={c.id}
+                      priceListId={c.priceListId}
+                      priceLists={priceLists}
+                    />
                   )}
                 </td>
                 <td className="py-sm">

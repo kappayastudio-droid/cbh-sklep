@@ -56,3 +56,81 @@ export async function setOrderStatus(formData: FormData) {
 
   revalidatePath("/admin/zamowienia")
 }
+
+/**
+ * Parsuje rabat z formularza: "40", "40,5", "40.5" → liczba 0–100 (2 miejsca).
+ * Zwraca null przy wartości niepoprawnej — akcja wtedy nic nie zapisuje.
+ */
+function parseDiscountPct(raw: FormDataEntryValue | null): number | null {
+  const parsed = Number.parseFloat(String(raw ?? "").replace(",", ".").trim())
+  if (!Number.isFinite(parsed)) return null
+  return Math.min(100, Math.max(0, Math.round(parsed * 100) / 100))
+}
+
+/** Nowy cennik rabatowy (np. „Stali klienci — 40%”). */
+export async function createPriceList(formData: FormData) {
+  await requireAdmin()
+
+  const name = String(formData.get("name") ?? "").trim()
+  const discountPct = parseDiscountPct(formData.get("discountPct"))
+  if (!name || discountPct === null) return
+
+  const supabase = createAdminClient()
+  await supabase.from("price_lists").insert({ name, discount_pct: discountPct })
+
+  revalidatePath("/admin/rabaty")
+  revalidatePath("/admin/klienci")
+}
+
+/** Zmiana nazwy / wysokości rabatu istniejącego cennika. */
+export async function updatePriceList(formData: FormData) {
+  await requireAdmin()
+
+  const id = String(formData.get("priceListId") ?? "")
+  const name = String(formData.get("name") ?? "").trim()
+  const discountPct = parseDiscountPct(formData.get("discountPct"))
+  if (!id || !name || discountPct === null) return
+
+  const supabase = createAdminClient()
+  await supabase
+    .from("price_lists")
+    .update({ name, discount_pct: discountPct })
+    .eq("id", id)
+
+  revalidatePath("/admin/rabaty")
+  revalidatePath("/admin/klienci")
+}
+
+/**
+ * Usunięcie cennika. Klienci do niego przypisani wracają do cen bazowych
+ * (FK `on delete set null`) — panel ostrzega o tym przed usunięciem.
+ */
+export async function deletePriceList(formData: FormData) {
+  await requireAdmin()
+
+  const id = String(formData.get("priceListId") ?? "")
+  if (!id) return
+
+  const supabase = createAdminClient()
+  await supabase.from("price_lists").delete().eq("id", id)
+
+  revalidatePath("/admin/rabaty")
+  revalidatePath("/admin/klienci")
+}
+
+/** Przypisanie klientowi cennika rabatowego (pusta wartość = ceny bazowe). */
+export async function setCustomerPriceList(formData: FormData) {
+  await requireAdmin()
+
+  const profileId = String(formData.get("profileId") ?? "")
+  const priceListId = String(formData.get("priceListId") ?? "").trim()
+  if (!profileId) return
+
+  const supabase = createAdminClient()
+  await supabase
+    .from("profiles")
+    .update({ price_list_id: priceListId || null })
+    .eq("id", profileId)
+
+  revalidatePath("/admin/klienci")
+}
