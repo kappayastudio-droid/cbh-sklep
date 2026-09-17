@@ -103,6 +103,9 @@ export default async function AdminOrdersPage() {
             city={o.addr?.city ?? ""}
             items={o.items}
             totalNet={o.totalNet}
+            subtotalNet={o.subtotalNet}
+            discountNet={o.discountNet}
+            shippingNet={o.shippingNet}
           />
 
           {/* Zmiana statusu */}

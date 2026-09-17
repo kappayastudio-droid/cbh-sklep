@@ -159,6 +159,10 @@ export type AdminOrder = {
   createdAt: string
   status: string
   totalNet: number
+  /** Kwoty zapisane przy składaniu zamówienia (migracja 0003); null = starsze zamówienie. */
+  subtotalNet: number | null
+  discountNet: number | null
+  shippingNet: number | null
   customerEmail: string
   customerCompany: string | null
   address: string | null
@@ -182,7 +186,9 @@ export async function adminListOrders(): Promise<AdminOrder[]> {
   const supabase = createAdminClient()
   const { data: orders } = await supabase
     .from("orders")
-    .select("id, profile_id, status, total_net, created_at, shipping_address_id")
+    .select(
+      "id, profile_id, status, total_net, subtotal_net, discount_net, shipping_net, created_at, shipping_address_id"
+    )
     .order("created_at", { ascending: false })
 
   if (!orders || orders.length === 0) return []
@@ -268,6 +274,9 @@ export async function adminListOrders(): Promise<AdminOrder[]> {
       createdAt: o.created_at,
       status: o.status,
       totalNet: o.total_net,
+      subtotalNet: o.subtotal_net ?? null,
+      discountNet: o.discount_net ?? null,
+      shippingNet: o.shipping_net ?? null,
       customerEmail: emailById.get(o.profile_id) ?? "—",
       customerCompany: companyById.get(o.profile_id) ?? null,
       address: o.shipping_address_id

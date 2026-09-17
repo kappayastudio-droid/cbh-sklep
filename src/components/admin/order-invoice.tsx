@@ -9,7 +9,7 @@ import {
   grossFromNet,
   vatFromNet,
 } from "@/lib/format"
-import { computeOrderTotals } from "@/lib/pricing"
+import { storedOrLegacyTotals } from "@/lib/pricing"
 
 type Item = { name: string; qty: number; unitPriceNet: number }
 
@@ -24,6 +24,9 @@ type Props = {
   city: string
   items: Item[]
   totalNet: number
+  subtotalNet: number | null
+  discountNet: number | null
+  shippingNet: number | null
 }
 
 /** Karta „Dane do faktury" — komplet do wystawienia faktury + przycisk Kopiuj. */
@@ -31,7 +34,15 @@ export function OrderInvoice(p: Props) {
   const [copied, setCopied] = React.useState(false)
 
   const subtotal = p.items.reduce((s, it) => s + it.unitPriceNet * it.qty, 0)
-  const t = computeOrderTotals(subtotal)
+  const t = storedOrLegacyTotals(
+    {
+      subtotalNet: p.subtotalNet,
+      discountNet: p.discountNet,
+      shippingNet: p.shippingNet,
+      totalNet: p.totalNet,
+    },
+    subtotal
+  )
   const vat = vatFromNet(t.totalNet)
   const gross = grossFromNet(t.totalNet)
 

@@ -10,19 +10,40 @@ import { Section } from "@/components/ui/section"
 import { Typography } from "@/components/ui/typography"
 import { useCart } from "@/lib/cart/cart-context"
 import { formatPriceNet, grossFromNet, vatFromNet } from "@/lib/format"
-import { computeOrderTotals, nextThresholdHint } from "@/lib/pricing"
+import {
+  computeOrderTotals,
+  nextThresholdHint,
+  quantityBreakHint,
+  quantityBreakPct,
+} from "@/lib/pricing"
 
 export default function CartPage() {
   const { items, count, hydrated, setQty, removeItem, clear } = useCart()
 
   const priced = items.filter((i) => typeof i.unitPriceNet === "number")
-  const subtotalNet = priced.reduce(
-    (sum, i) => sum + (i.unitPriceNet ?? 0) * i.qty,
-    0
-  )
   const allPriced = priced.length === items.length
-  const totals = computeOrderTotals(subtotalNet)
-  const hint = nextThresholdHint(subtotalNet)
+  const totals = computeOrderTotals(
+    priced.map((i) => ({
+      slug: i.productSlug,
+      qty: i.qty,
+      unitPriceNet: i.unitPriceNet ?? 0,
+    }))
+  )
+  const hint = nextThresholdHint(totals.netAfterDiscount)
+
+  // Progi ilościowe liczą się od łącznej liczby sztuk produktu w koszyku.
+  const qtyBySlug = new Map<string, number>()
+  for (const i of items) {
+    qtyBySlug.set(i.productSlug, (qtyBySlug.get(i.productSlug) ?? 0) + i.qty)
+  }
+  // Podpowiedź „dodaj jeszcze X" pokazujemy raz na produkt, przy pierwszej pozycji.
+  const hintShownFor = new Set<string>()
+  const showHintOn = new Set<string>()
+  for (const i of items) {
+    if (hintShownFor.has(i.productSlug)) continue
+    hintShownFor.add(i.productSlug)
+    showHintOn.add(`${i.productSlug}::${i.variantValue ?? ""}`)
+  }
 
   return (
     <>
@@ -111,6 +132,29 @@ export default function CartPage() {
                           Razem: {formatPriceNet(item.unitPriceNet * item.qty)}
                         </span>
                       )}
+                      {(() => {
+                        const totalQty = qtyBySlug.get(item.productSlug) ?? 0
+                        const bp = quantityBreakPct(item.productSlug, totalQty)
+                        if (bp > 0) {
+                          return (
+                            <span className="mt-2xs w-fit rounded-full bg-[#787169] px-2 py-0.5 text-caption text-white">
+                              Rabat ilościowy −{bp}%
+                            </span>
+                          )
+                        }
+                        const qh = quantityBreakHint(item.productSlug, totalQty)
+                        const key = `${item.productSlug}::${item.variantValue ?? ""}`
+                        if (qh && showHintOn.has(key)) {
+                          return (
+                            <span className="mt-2xs w-fit rounded-md bg-surface-2 px-sm py-2xs text-caption text-foreground">
+                              Dodaj jeszcze {qh.missing}{" "}
+                              {qh.missing === 1 ? "sztukę" : "szt."}, aby
+                              otrzymać {qh.pct}% rabatu
+                            </span>
+                          )
+                        }
+                        return null
+                      })()}
                     </div>
 
                     {/* Ilość + usuń */}
@@ -184,11 +228,19 @@ export default function CartPage() {
                       {formatPriceNet(totals.subtotalNet)}
                     </span>
                   </div>
-                  {totals.discountPct > 0 && (
+                  {totals.quantityDiscount > 0 && (
                     <div className="mt-2xs flex items-baseline justify-between text-body2 text-[#787169]">
-                      <span>Rabat {totals.discountPct}%</span>
+                      <span>Rabat ilościowy</span>
                       <span className="tabular-nums">
-                        −{formatPriceNet(totals.discountAmount)}
+                        −{formatPriceNet(totals.quantityDiscount)}
+                      </span>
+                    </div>
+                  )}
+                  {totals.volumeDiscount > 0 && (
+                    <div className="mt-2xs flex items-baseline justify-between text-body2 text-[#787169]">
+                      <span>Rabat progowy {totals.volumeDiscountPct}%</span>
+                      <span className="tabular-nums">
+                        −{formatPriceNet(totals.volumeDiscount)}
                       </span>
                     </div>
                   )}

@@ -118,6 +118,7 @@ export async function placeOrder(formData: FormData) {
       const label =
         i.r!.product.name + (i.variantValue ? ` – ${i.variantValue}` : "")
       return {
+        slug: i.slug,
         variant_id: i.r!.id,
         name_snapshot: label,
         unit_price_net: price,
@@ -133,12 +134,15 @@ export async function placeOrder(formData: FormData) {
     )
   }
 
-  // Wartość netto towarów → rabat progowy + koszt dostawy (autorytatywnie).
-  const subtotalNet = lineItems.reduce(
-    (sum, li) => sum + li.unit_price_net * li.qty,
-    0
+  // Rabaty ilościowe per pozycja + rabat progowy + dostawa — AUTORYTATYWNIE
+  // na serwerze. Cen z koszyka w przeglądarce nie bierzemy pod uwagę.
+  const totals = computeOrderTotals(
+    lineItems.map((li) => ({
+      slug: li.slug,
+      qty: li.qty,
+      unitPriceNet: li.unit_price_net,
+    }))
   )
-  const totals = computeOrderTotals(subtotalNet)
 
   // Adres wysyłki
   const { data: address } = await supabase
@@ -161,6 +165,11 @@ export async function placeOrder(formData: FormData) {
       profile_id: user.id,
       status: "pending",
       total_net: totals.totalNet,
+      // Utrwalamy kwoty (migracja 0003) — mail i faktura mają pokazywać to,
+      // co klient faktycznie zapłacił, nawet gdy reguły cenowe się zmienią.
+      subtotal_net: totals.subtotalNet,
+      discount_net: totals.discountAmount,
+      shipping_net: totals.shippingNet,
       shipping_address_id: address?.id ?? null,
     })
     .select("id")
@@ -175,7 +184,9 @@ export async function placeOrder(formData: FormData) {
 
   await supabase
     .from("order_items")
-    .insert(lineItems.map((li) => ({ ...li, order_id: order.id })))
+    .insert(
+      lineItems.map(({ slug: _slug, ...li }) => ({ ...li, order_id: order.id }))
+    )
 
   // ── Płatność online Przelewy24 (jeśli skonfigurowane) ───────────────────
   // Sesja P24 = id zamówienia. Do bramki wysyłamy kwotę BRUTTO (net + VAT 23%).
