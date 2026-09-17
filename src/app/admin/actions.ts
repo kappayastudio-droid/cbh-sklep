@@ -179,3 +179,71 @@ export async function setCustomerPriceList(formData: FormData) {
 
   revalidatePath("/admin/klienci")
 }
+
+// ── Banery na stronie głównej ─────────────────────────────────────────
+
+function bannerFields(formData: FormData) {
+  const sortRaw = Number.parseInt(String(formData.get("sort") ?? ""), 10)
+  return {
+    sort: Number.isFinite(sortRaw) ? sortRaw : 0,
+    is_published: formData.get("is_published") != null,
+    image: String(formData.get("image") ?? "").trim(),
+    alt: String(formData.get("alt") ?? "").trim(),
+    eyebrow: String(formData.get("eyebrow") ?? "").trim(),
+    title: String(formData.get("title") ?? "").trim(),
+    subtitle: String(formData.get("subtitle") ?? "").trim(),
+    cta_label: String(formData.get("ctaLabel") ?? "").trim(),
+    cta_href: String(formData.get("ctaHref") ?? "").trim(),
+  }
+}
+
+/** Nowy baner. Trafia na koniec karuzeli i domyślnie jest ukryty. */
+export async function createBanner(formData: FormData) {
+  await requireAdmin()
+
+  const supabase = createAdminClient()
+  const { data: last } = await supabase
+    .from("banners")
+    .select("sort")
+    .order("sort", { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  await supabase.from("banners").insert({
+    ...bannerFields(formData),
+    sort: (Number(last?.sort ?? 0) || 0) + 10,
+    // Nowy baner nie pokazuje się od razu — właściciel najpierw go uzupełnia.
+    is_published: false,
+  })
+
+  revalidatePath("/admin/banery")
+  revalidatePath("/")
+}
+
+/** Zapis treści banera. */
+export async function updateBanner(formData: FormData) {
+  await requireAdmin()
+
+  const id = String(formData.get("bannerId") ?? "")
+  if (!id) return
+
+  const supabase = createAdminClient()
+  await supabase.from("banners").update(bannerFields(formData)).eq("id", id)
+
+  revalidatePath("/admin/banery")
+  revalidatePath("/")
+}
+
+/** Usunięcie banera. */
+export async function deleteBanner(formData: FormData) {
+  await requireAdmin()
+
+  const id = String(formData.get("bannerId") ?? "")
+  if (!id) return
+
+  const supabase = createAdminClient()
+  await supabase.from("banners").delete().eq("id", id)
+
+  revalidatePath("/admin/banery")
+  revalidatePath("/")
+}

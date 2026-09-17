@@ -333,3 +333,72 @@ export async function adminGetProduct(
     image: data.image ?? "",
   }
 }
+
+export type AdminBanner = {
+  id: string
+  sort: number
+  isPublished: boolean
+  image: string
+  alt: string
+  eyebrow: string
+  title: string
+  subtitle: string
+  ctaLabel: string
+  ctaHref: string
+}
+
+/** Wszystkie banery — także ukryte — do edycji w panelu. */
+export async function adminListBanners(): Promise<AdminBanner[]> {
+  const supabase = createAdminClient()
+  const { data } = await supabase
+    .from("banners")
+    .select(
+      "id, sort, is_published, image, alt, eyebrow, title, subtitle, cta_label, cta_href"
+    )
+    .order("sort", { ascending: true })
+
+  return (data ?? []).map((b) => ({
+    id: b.id,
+    sort: Number(b.sort ?? 0),
+    isPublished: Boolean(b.is_published),
+    image: b.image ?? "",
+    alt: b.alt ?? "",
+    eyebrow: b.eyebrow ?? "",
+    title: b.title ?? "",
+    subtitle: b.subtitle ?? "",
+    ctaLabel: b.cta_label ?? "",
+    ctaHref: b.cta_href ?? "",
+  }))
+}
+
+/**
+ * Zdjęcia leżące w /public — podpowiedzi do pola „Zdjęcie" w banerach.
+ * Właściciel wybiera spośród tego, co już jest na serwerze; wgranie zupełnie
+ * nowego pliku nadal wymaga programisty (patrz uwaga w panelu).
+ */
+export async function listPublicImages(): Promise<string[]> {
+  const { readdir } = await import("node:fs/promises")
+  const { join } = await import("node:path")
+  const root = join(process.cwd(), "public")
+  const out: string[] = []
+  const exts = /\.(png|jpe?g|webp|avif|svg)$/i
+
+  async function walk(dir: string, prefix: string) {
+    let entries
+    try {
+      entries = await readdir(dir, { withFileTypes: true })
+    } catch {
+      return
+    }
+    for (const e of entries) {
+      if (e.name.startsWith(".")) continue
+      if (e.isDirectory()) {
+        await walk(join(dir, e.name), `${prefix}/${e.name}`)
+      } else if (exts.test(e.name)) {
+        out.push(`${prefix}/${e.name}`)
+      }
+    }
+  }
+  await walk(root, "")
+  return out.sort()
+}

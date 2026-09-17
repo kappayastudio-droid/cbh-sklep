@@ -14,6 +14,7 @@ const tabs = [
   { href: "/admin/ceny", label: "Ceny i stany" },
   { href: "/admin/klienci", label: "Klienci" },
   { href: "/admin/rabaty", label: "Rabaty" },
+  { href: "/admin/banery", label: "Banery" },
 ]
 
 export default async function AdminLayout({
