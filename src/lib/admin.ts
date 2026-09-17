@@ -21,6 +21,10 @@ export type AdminVariant = {
   value: string
   basePrice: number
   inStock: boolean
+  /** Rabat promocyjny % (0 = brak). */
+  promoPct: number
+  /** Ostatni dzień promocji (YYYY-MM-DD) albo null = bezterminowa. */
+  promoUntil: string | null
 }
 
 export type AdminProduct = {
@@ -40,7 +44,9 @@ export async function adminListCatalog(): Promise<AdminProduct[]> {
       supabase.from("products").select("id, slug, name, brand_id").order("name"),
       supabase
         .from("variants")
-        .select("id, product_id, value, base_price, in_stock, sort")
+        .select(
+          "id, product_id, value, base_price, in_stock, sort, promo_pct, promo_until"
+        )
         .order("sort"),
       supabase.from("brands").select("id, name"),
     ])
@@ -53,6 +59,8 @@ export async function adminListCatalog(): Promise<AdminProduct[]> {
       value: v.value,
       basePrice: v.base_price,
       inStock: v.in_stock,
+      promoPct: Number(v.promo_pct ?? 0),
+      promoUntil: v.promo_until ?? null,
     })
     byProduct.set(v.product_id, arr)
   }
@@ -292,4 +300,36 @@ export async function adminListOrders(): Promise<AdminOrder[]> {
       weightGrams: estimateWeightGrams(items),
     }
   })
+}
+
+export type AdminProductDetail = {
+  id: string
+  slug: string
+  name: string
+  shortDescription: string
+  description: string
+  isPublished: boolean
+  image: string
+}
+
+/** Jeden produkt do edycji na stronie /admin/produkty/[slug]. */
+export async function adminGetProduct(
+  slug: string
+): Promise<AdminProductDetail | null> {
+  const supabase = createAdminClient()
+  const { data } = await supabase
+    .from("products")
+    .select("id, slug, name, short_description, description, is_published, image")
+    .eq("slug", slug)
+    .maybeSingle()
+  if (!data) return null
+  return {
+    id: data.id,
+    slug: data.slug,
+    name: data.name,
+    shortDescription: data.short_description ?? "",
+    description: data.description ?? "",
+    isPublished: Boolean(data.is_published),
+    image: data.image ?? "",
+  }
 }

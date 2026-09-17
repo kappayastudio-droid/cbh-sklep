@@ -28,6 +28,8 @@ type ProductPurchaseProps = {
   priceVariantId?: string
   /** Ceny netto (grosze) per UUID wariantu — tylko dla zatwierdzonych klientów. */
   prices?: Record<string, number>
+  /** Aktywne promocje per UUID wariantu: rabat % i cena sprzed promocji. */
+  promos?: Record<string, { pct: number; beforeNet: number }>
   /** Wybór wariantu i zakup dostępne wyłącznie dla zalogowanych klientów B2B. */
   isAuthenticated?: boolean
 }
@@ -46,6 +48,7 @@ export function ProductPurchase({
   productImage,
   priceVariantId,
   prices = {},
+  promos = {},
   isAuthenticated = false,
 }: ProductPurchaseProps) {
   const { addItem } = useCart()
@@ -65,13 +68,9 @@ export function ProductPurchase({
   const [justAdded, setJustAdded] = React.useState(false)
 
   const selectedVariant = available.find((v) => v.value === selected)
-  const currentPriceNet = hasVariants
-    ? selectedVariant?.id
-      ? prices[selectedVariant.id]
-      : undefined
-    : priceVariantId
-      ? prices[priceVariantId]
-      : undefined
+  const currentVariantId = hasVariants ? selectedVariant?.id : priceVariantId
+  const currentPriceNet = currentVariantId ? prices[currentVariantId] : undefined
+  const currentPromo = currentVariantId ? promos[currentVariantId] : undefined
 
   // Gość — bez wyboru pojemności, tylko bramka logowania.
   if (!isAuthenticated) {
@@ -189,12 +188,28 @@ export function ProductPurchase({
 
       {/* Pojedyncza cena — wybranego wariantu lub produktu bez wariantów */}
       {typeof currentPriceNet === "number" && currentPriceNet > 0 ? (
-        <Typography variant="h5" as="p" className="font-semibold text-foreground">
-          {formatPriceNet(currentPriceNet)}{" "}
-          <span className="text-caption font-normal text-muted-foreground">
-            netto / szt.
-          </span>
-        </Typography>
+        <div className="flex flex-wrap items-baseline gap-sm">
+          <Typography
+            variant="h5"
+            as="p"
+            className="font-semibold text-foreground"
+          >
+            {formatPriceNet(currentPriceNet)}{" "}
+            <span className="text-caption font-normal text-muted-foreground">
+              netto / szt.
+            </span>
+          </Typography>
+          {currentPromo && currentPromo.beforeNet > currentPriceNet && (
+            <>
+              <span className="text-body2 text-muted-foreground line-through">
+                {formatPriceNet(currentPromo.beforeNet)}
+              </span>
+              <span className="rounded-full bg-[#8c3f2a] px-2 py-0.5 text-caption font-medium text-white">
+                −{Math.round(currentPromo.pct)}%
+              </span>
+            </>
+          )}
+        </div>
       ) : (
         canAddToCart && (
           <p className="text-[14px] text-muted-foreground">Cena na zapytanie</p>

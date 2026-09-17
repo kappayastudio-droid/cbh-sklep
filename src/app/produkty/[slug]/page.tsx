@@ -12,7 +12,7 @@ import {
   getListingPrices,
   getProductBySlug,
   getRelatedProducts,
-  getVariantPrices,
+  getVariantPricing,
   getVisibleProducts,
 } from "@/lib/catalog"
 import { getSession } from "@/lib/auth"
@@ -89,7 +89,9 @@ export default async function ProductPage({ params }: PageProps) {
     : product.priceVariantId
       ? [product.priceVariantId]
       : []
-  const priceMap = canSeePrices ? await getVariantPrices(variantIds) : {}
+  const { prices: priceMap, promos: promoMap } = canSeePrices
+    ? await getVariantPricing(variantIds)
+    : { prices: {}, promos: {} }
   const relatedPrices = canSeePrices ? await getListingPrices(related) : {}
 
   // Dane strukturalne produktu (bez ceny — ceny są tylko dla zalogowanych B2B).
@@ -209,6 +211,7 @@ export default async function ProductPage({ params }: PageProps) {
               productImage={product.image}
               priceVariantId={product.priceVariantId}
               prices={priceMap}
+              promos={promoMap}
               isAuthenticated={canSeePrices}
             />
 

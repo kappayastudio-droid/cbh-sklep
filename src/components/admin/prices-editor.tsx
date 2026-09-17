@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 
 import { updateVariant } from "@/app/admin/actions"
 import { Button } from "@/components/ui/button"
@@ -65,8 +66,9 @@ export function PricesEditor({ products }: { products: AdminProduct[] }) {
           className="h-10 w-full max-w-[24rem] appearance-none border border-border bg-background px-md text-body2 outline-none focus-visible:border-ring"
         />
         <Typography variant="caption" className="text-muted-foreground">
-          {filtered.length} produktów. Wpisz cenę netto (zł) i zaznacz
-          dostępność, potem „Zapisz" przy wierszu.
+          {filtered.length} produktów. Wpisz cenę netto (zł), ewentualną
+          promocję i zaznacz dostępność, potem „Zapisz" przy wierszu.
+          „Edytuj" otwiera opis produktu.
         </Typography>
       </div>
 
@@ -111,6 +113,32 @@ export function PricesEditor({ products }: { products: AdminProduct[] }) {
                     </label>
                     <label className="flex items-center gap-2xs text-body2">
                       <input
+                        type="text"
+                        name="promo_pct"
+                        inputMode="decimal"
+                        defaultValue={v.promoPct > 0 ? String(v.promoPct) : ""}
+                        placeholder="0"
+                        aria-label="Promocja w procentach"
+                        className="h-9 w-16 border border-border bg-background px-sm text-right text-body2 outline-none focus-visible:border-ring"
+                      />
+                      <span className="text-caption text-muted-foreground">
+                        % promo
+                      </span>
+                    </label>
+                    <label className="flex items-center gap-2xs text-body2">
+                      <span className="text-caption text-muted-foreground">
+                        do
+                      </span>
+                      <input
+                        type="date"
+                        name="promo_until"
+                        defaultValue={v.promoUntil ?? ""}
+                        aria-label="Ostatni dzień promocji"
+                        className="h-9 border border-border bg-background px-sm text-body2 outline-none focus-visible:border-ring"
+                      />
+                    </label>
+                    <label className="flex items-center gap-2xs text-body2">
+                      <input
                         type="checkbox"
                         name="in_stock"
                         defaultChecked={v.inStock}
@@ -121,6 +149,12 @@ export function PricesEditor({ products }: { products: AdminProduct[] }) {
                     <Button type="submit" size="sm" variant="outline">
                       Zapisz
                     </Button>
+                    <Link
+                      href={`/admin/produkty/${p.slug}`}
+                      className="text-body2 text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
+                    >
+                      Edytuj
+                    </Link>
                   </form>
                 ))}
               </div>

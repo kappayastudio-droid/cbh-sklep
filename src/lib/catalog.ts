@@ -197,24 +197,58 @@ export async function getRelatedProducts(
  * RPC `variant_prices` zwraca pusto dla gościa/niezatwierdzonego, więc ceny
  * nigdy nie wyciekają. Zwraca mapę { variantId: price_net }.
  */
-export async function getVariantPrices(
-  variantIds: string[]
-): Promise<Record<string, number>> {
-  if (!configured() || variantIds.length === 0) return {}
+export type VariantPromo = {
+  /** Aktywny rabat promocyjny % (0 = brak promocji). */
+  pct: number
+  /** Cena sprzed promocji (grosze) — do przekreślenia w sklepie. */
+  beforeNet: number
+}
+
+/**
+ * Ceny + promocje w jednym wywołaniu RPC.
+ * Zwraca pusto dla gościa/niezatwierdzonego, więc ceny nigdy nie wyciekają.
+ */
+export async function getVariantPricing(variantIds: string[]): Promise<{
+  prices: Record<string, number>
+  promos: Record<string, VariantPromo>
+}> {
+  const empty = { prices: {}, promos: {} }
+  if (!configured() || variantIds.length === 0) return empty
   try {
     const supabase = await createClient()
     const { data, error } = await supabase.rpc("variant_prices", {
       p_variant_ids: variantIds,
     })
-    if (error || !data) return {}
-    const out: Record<string, number> = {}
-    for (const row of data as { variant_id: string; price_net: number }[]) {
-      out[row.variant_id] = row.price_net
+    if (error || !data) return empty
+    const prices: Record<string, number> = {}
+    const promos: Record<string, VariantPromo> = {}
+    for (const row of data as {
+      variant_id: string
+      price_net: number
+      promo_pct: number | null
+      price_before_promo_net: number | null
+    }[]) {
+      prices[row.variant_id] = row.price_net
+      const pct = Number(row.promo_pct ?? 0)
+      if (pct > 0) {
+        promos[row.variant_id] = {
+          pct,
+          beforeNet: row.price_before_promo_net ?? row.price_net,
+        }
+      }
     }
-    return out
+    return { prices, promos }
   } catch {
-    return {}
+    return empty
   }
+}
+
+/** Same ceny netto (grosze) per wariant — dla miejsc, które nie pokazują promocji. */
+export async function getVariantPrices(
+  variantIds: string[]
+): Promise<Record<string, number>> {
+  const { prices } = await getVariantPricing(variantIds)
+  return prices
 }
 
 /**

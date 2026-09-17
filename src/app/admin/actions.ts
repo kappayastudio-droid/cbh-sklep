@@ -19,13 +19,58 @@ export async function updateVariant(formData: FormData) {
 
   if (!id) return
 
+  // Promocja: procent od ceny bazowej + opcjonalna data końca.
+  const promoRaw = String(formData.get("promo_pct") ?? "").replace(",", ".").trim()
+  const promoParsed = Number.parseFloat(promoRaw)
+  const promoPct = Number.isFinite(promoParsed)
+    ? Math.min(100, Math.max(0, Math.round(promoParsed * 100) / 100))
+    : 0
+  const untilRaw = String(formData.get("promo_until") ?? "").trim()
+  const promoUntil = /^\d{4}-\d{2}-\d{2}$/.test(untilRaw) ? untilRaw : null
+
   const supabase = createAdminClient()
   await supabase
     .from("variants")
-    .update({ base_price: Math.max(0, basePrice), in_stock: inStock })
+    .update({
+      base_price: Math.max(0, basePrice),
+      in_stock: inStock,
+      promo_pct: promoPct,
+      // Data bez promocji nie ma sensu — czyścimy ją razem z rabatem.
+      promo_until: promoPct > 0 ? promoUntil : null,
+    })
     .eq("id", id)
 
   revalidatePath("/admin/ceny")
+  revalidatePath("/promocje")
+}
+
+/** Zapis opisu, nazwy i widoczności produktu (strona /admin/produkty/[slug]). */
+export async function updateProduct(formData: FormData) {
+  await requireAdmin()
+
+  const slug = String(formData.get("slug") ?? "").trim()
+  const name = String(formData.get("name") ?? "").trim()
+  if (!slug || !name) return
+
+  const shortDescription = String(formData.get("shortDescription") ?? "").trim()
+  const description = String(formData.get("description") ?? "").trim()
+  const isPublished = formData.get("is_published") != null
+
+  const supabase = createAdminClient()
+  await supabase
+    .from("products")
+    .update({
+      name,
+      short_description: shortDescription,
+      description,
+      is_published: isPublished,
+    })
+    .eq("slug", slug)
+
+  revalidatePath(`/admin/produkty/${slug}`)
+  revalidatePath("/admin/ceny")
+  revalidatePath(`/produkty/${slug}`)
+  revalidatePath("/sklep")
 }
 
 /** Zatwierdzenie / cofnięcie zatwierdzenia klienta B2B. */
