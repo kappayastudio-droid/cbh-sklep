@@ -129,7 +129,10 @@ export default function CartPage() {
                       </span>
                       {typeof item.unitPriceNet === "number" && item.qty > 1 && (
                         <span className="text-caption font-medium text-foreground">
-                          Razem: {formatPriceNet(item.unitPriceNet * item.qty)}
+                          Razem: {formatPriceNet(item.unitPriceNet * item.qty)}{" "}
+                          <span className="font-normal text-muted-foreground">
+                            netto
+                          </span>
                         </span>
                       )}
                       {(() => {

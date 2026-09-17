@@ -18,6 +18,7 @@ import {
 import { getSession } from "@/lib/auth"
 import { breadcrumbLd } from "@/lib/jsonld"
 import { SITE_URL } from "@/lib/site"
+import { isProductAvailable } from "@/lib/availability"
 
 type PageProps = {
   params: Promise<{ slug: string }>
@@ -212,6 +213,7 @@ export default async function ProductPage({ params }: PageProps) {
               priceVariantId={product.priceVariantId}
               prices={priceMap}
               promos={promoMap}
+              priceVariantInStock={product.priceVariantInStock}
               isAuthenticated={canSeePrices}
             />
 
@@ -261,6 +263,7 @@ export default async function ProductPage({ params }: PageProps) {
             {related.slice(0, 4).map((p) => (
               <ProductCard
                 key={p.slug}
+                available={isProductAvailable(p)}
                 href={`/produkty/${p.slug}`}
                 image={p.image}
                 imageAlt={p.name}

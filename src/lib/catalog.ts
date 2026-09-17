@@ -59,11 +59,14 @@ async function fetchCatalog(): Promise<CatalogData | null> {
 
     const variantsByProduct = new Map<string, ProductVariant[]>()
     const defaultVariantByProduct = new Map<string, string>()
+    const defaultStockByProduct = new Map<string, boolean>()
     for (const v of varRes.data ?? []) {
       // "default" to syntetyczny wariant z seeda (produkt bez wariantów) —
-      // nie pokazujemy go jako opcji, ale zapamiętujemy jako nośnik ceny.
+      // nie pokazujemy go jako opcji, ale zapamiętujemy jako nośnik ceny
+      // ORAZ jego stan magazynowy (panel ustawia go przy tym wierszu).
       if (v.value === "default") {
         defaultVariantByProduct.set(v.product_id, v.id)
+        defaultStockByProduct.set(v.product_id, v.in_stock)
         continue
       }
       const arr = variantsByProduct.get(v.product_id) ?? []
@@ -88,6 +91,7 @@ async function fetchCatalog(): Promise<CatalogData | null> {
       variantAttribute: p.variant_attribute ?? "",
       variants: variantsByProduct.get(p.id) ?? [],
       priceVariantId: defaultVariantByProduct.get(p.id),
+      priceVariantInStock: defaultStockByProduct.get(p.id),
     }))
 
     const categories: Category[] = (catRes.data ?? []).map((c) => ({

@@ -14,6 +14,7 @@ import {
 import { getSession } from "@/lib/auth"
 import { breadcrumbLd } from "@/lib/jsonld"
 import { categoryIntro } from "@/lib/seo-intros"
+import { isProductAvailable } from "@/lib/availability"
 
 type PageProps = {
   params: Promise<{ slug: string }>
@@ -102,6 +103,7 @@ export default async function CategoryPage({ params }: PageProps) {
         {products.map((p) => (
           <ProductCard
             key={p.slug}
+            available={isProductAvailable(p)}
             href={`/produkty/${p.slug}`}
             image={p.image}
             imageAlt={p.name}

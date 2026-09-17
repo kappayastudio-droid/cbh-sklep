@@ -39,6 +39,11 @@ export type Product = {
   variants: ProductVariant[]
   /** UUID syntetycznego wariantu „default" (produkt bez wariantów) — nośnik ceny. */
   priceVariantId?: string
+  /**
+   * Stan magazynowy wariantu „default". Uzupełniany przez `catalog.ts` z bazy —
+   * w statycznym fallbacku go nie ma, więc `undefined` = traktuj jak dostępny.
+   */
+  priceVariantInStock?: boolean
 }
 
 export type Category = {

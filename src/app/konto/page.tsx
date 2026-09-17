@@ -304,7 +304,10 @@ export default async function AccountPage({
                     {ORDER_STATUS_LABELS[o.status] ?? o.status}
                   </p>
                   <span className="font-semibold tabular-nums">
-                    {formatPriceNet(o.total_net)}
+                    {formatPriceNet(o.total_net)}{" "}
+                    <span className="font-normal text-muted-foreground">
+                      netto
+                    </span>
                   </span>
                 </div>
                 <ul className="mt-sm flex flex-col gap-2xs border-t border-border pt-sm text-body2">
@@ -314,7 +317,8 @@ export default async function AccountPage({
                         {it.qty} × {it.name_snapshot}
                       </span>
                       <span className="shrink-0 tabular-nums">
-                        {formatPriceNet(it.unit_price_net * it.qty)}
+                        {formatPriceNet(it.unit_price_net * it.qty)}{" "}
+                        <span className="text-muted-foreground">netto</span>
                       </span>
                     </li>
                   ))}

@@ -136,7 +136,7 @@ export function CheckoutForm({ defaults }: { defaults: Defaults }) {
               </span>
               <span className="shrink-0 tabular-nums">
                 {typeof i.unitPriceNet === "number"
-                  ? formatPriceNet(i.unitPriceNet * i.qty)
+                  ? `${formatPriceNet(i.unitPriceNet * i.qty)} netto`
                   : "—"}
               </span>
             </li>

@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/product-card"
 import { Typography } from "@/components/ui/typography"
 import { cn } from "@/lib/utils"
 import type { Product } from "@/lib/products"
+import { isProductAvailable } from "@/lib/availability"
 
 /** Lista produktów marki z filtrowaniem po podkategoriach (chipy). */
 export function BrandProducts({
@@ -76,6 +77,7 @@ export function BrandProducts({
         {filtered.map((p) => (
           <ProductCard
             key={p.slug}
+            available={isProductAvailable(p)}
             href={`/produkty/${p.slug}`}
             image={p.image}
             imageAlt={p.name}
