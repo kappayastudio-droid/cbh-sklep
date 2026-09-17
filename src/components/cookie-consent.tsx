@@ -40,13 +40,14 @@ export function CookieConsent() {
   return (
     <div
       role="dialog"
-      aria-label="Zgoda na pliki cookies"
+      aria-label="Informacja o plikach cookies"
       className="fixed inset-x-0 bottom-0 z-[60] px-md pb-md"
     >
       <div className="mx-auto flex w-full max-w-[var(--container-content)] flex-col gap-md rounded-lg border border-border bg-popover p-lg shadow-lg sm:flex-row sm:items-center sm:justify-between">
         <p className="text-body2 text-muted-foreground">
-          Używamy plików cookies, aby zapewnić działanie sklepu oraz — za Twoją
-          zgodą — do analityki i reklam (m.in. Google). Szczegóły w{" "}
+          Używamy wyłącznie plików cookies niezbędnych do działania sklepu —
+          utrzymują Twoje zalogowanie i zapamiętują tę informację. Nie
+          prowadzimy analityki ani reklam. Szczegóły w{" "}
           <Link
             href="/polityka-cookies"
             className="font-medium text-foreground underline underline-offset-4"
@@ -56,15 +57,11 @@ export function CookieConsent() {
           .
         </p>
         <div className="flex shrink-0 flex-col gap-sm sm:flex-row">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => choose("necessary")}
-          >
-            Tylko niezbędne
-          </Button>
-          <Button size="sm" onClick={() => choose("all")}>
-            Akceptuj wszystkie
+          {/* Jeden przycisk, bo nie ma tu żadnego wyboru do dokonania:
+              używamy wyłącznie cookies niezbędnych, na które zgoda nie jest
+              wymagana. Dwa przyciski sugerowałyby wybór, którego nie ma. */}
+          <Button size="sm" onClick={() => choose("necessary")}>
+            Rozumiem
           </Button>
         </div>
       </div>

@@ -110,170 +110,138 @@ export default function PrivacyPolicyPage() {
             informujemy o zmieniających się warunkach przetwarzania danych.
           </p>
 
-          <h2>Pliki cookies</h2>
+          <h3>Konto w sklepie internetowym B2B</h3>
           <p>
-            Wykorzystujemy pliki cookies w celu zapewnienia poprawnego działania
-            serwisu, a w szczególności dostosowania zawartości serwisu do
-            preferencji użytkownika oraz optymalizacji korzystania z serwisu. W
-            szczególności pliki te pozwalają rozpoznać podstawowe parametry
-            urządzenia użytkownika (takie jak: typ urządzenia, rozdzielczość
-            ekranu, kraj, z którego dochodzi do wejścia) i dzięki temu
-            odpowiednio wyświetlić stronę internetową dostosowaną do jego potrzeb.
+            <strong>Zakres danych:</strong> adres e-mail, hasło (przechowywane
+            wyłącznie w postaci zaszyfrowanej), imię i nazwisko, nazwa firmy,
+            NIP, numer telefonu.
           </p>
           <p>
-            Wykorzystujemy także cookies w celu zbierania ogólnych i anonimowych
-            danych statystycznych za pośrednictwem narzędzi analitycznych i
-            marketingowych:
+            <strong>Podstawa prawna:</strong> art. 6 ust. 1 lit. b RODO —
+            przetwarzanie jest niezbędne do wykonania umowy o prowadzenie konta
+            w serwisie.
+          </p>
+
+          <h3>Realizacja zamówień hurtowych</h3>
+          <p>
+            <strong>Zakres danych:</strong> dane konta, adres dostawy, dane do
+            faktury, zawartość i wartość zamówienia oraz indywidualne warunki
+            handlowe (przyznany rabat).
+          </p>
+          <p>
+            <strong>Podstawa prawna:</strong> art. 6 ust. 1 lit. b RODO
+            (wykonanie umowy sprzedaży) oraz art. 6 ust. 1 lit. c RODO —
+            wypełnienie obowiązków wynikających z przepisów podatkowych
+            i o rachunkowości, które wymagają przechowywania dokumentacji
+            sprzedaży przez 5 lat, licząc od końca roku kalendarzowego, w którym
+            upłynął termin płatności podatku.
+          </p>
+
+          <h3>Płatności online</h3>
+          <p>
+            <strong>Zakres danych:</strong> dane niezbędne do rozliczenia
+            transakcji, przekazywane operatorowi płatności. Nie przechowujemy
+            danych Państwa karty płatniczej — obsługuje je wyłącznie operator.
+          </p>
+          <p>
+            <strong>Podstawa prawna:</strong> art. 6 ust. 1 lit. b RODO.
+          </p>
+
+          <h3>Obsługa stałych klientów hurtowych</h3>
+          <p>
+            <strong>Zakres danych:</strong> dane kontaktowe i handlowe salonów
+            oraz firm, które kupują u nas od lat, pozyskane w związku z
+            prowadzoną sprzedażą — telefonicznie, mailowo oraz z dokumentów
+            sprzedaży.
+          </p>
+          <p>
+            <strong>Podstawa prawna:</strong> art. 6 ust. 1 lit. b RODO
+            (wykonanie umowy sprzedaży) oraz art. 6 ust. 1 lit. f RODO — nasz
+            prawnie uzasadniony interes polegający na obsłudze i kontynuowaniu
+            bieżącej współpracy handlowej.
+          </p>
+
+          <h2>Pliki cookies</h2>
+          <p>
+            Korzystamy wyłącznie z plików cookies niezbędnych do działania
+            serwisu. <strong>Nie prowadzimy analityki internetowej, nie
+            wyświetlamy reklam i nie profilujemy Państwa na potrzeby
+            marketingu.</strong> Nie korzystamy z Google Analytics, Google Ads
+            ani z narzędzi reklamowych Meta (Facebook).
           </p>
           <ul>
             <li>
-              Google Analytics (administrator cookies: Google Inc z siedzibą w
-              USA),
+              <strong>Sesja i logowanie</strong> — pliki cookies utrzymujące
+              Państwa zalogowanie na koncie B2B. Bez nich logowanie
+              i składanie zamówień nie działa.
             </li>
             <li>
-              Google AdWords (administrator cookies: Google Ireland Limited z
-              siedzibą w Irlandii),
-            </li>
-            <li>
-              Facebook (administrator cookies: Facebook Ireland Ltd. z siedzibą w
-              Irlandii),
+              <strong>Zapamiętanie decyzji o cookies</strong> — informacja o
+              tym, że baner został już zamknięty, aby nie pojawiał się przy
+              każdej wizycie.
             </li>
           </ul>
           <p>
+            Zawartość koszyka przechowujemy w pamięci lokalnej przeglądarki
+            (localStorage) na Państwa urządzeniu. Dane te pozostają na Państwa
+            komputerze i trafiają do nas dopiero w chwili złożenia zamówienia.
+          </p>
+          <p>
             Mogą Państwo samodzielnie i w każdym czasie zmienić ustawienia
             dotyczące plików cookies, określając warunki ich przechowywania i
-            uzyskiwania dostępu przez pliki cookies do urządzenia użytkownika.
-            Zmiany ustawień można dokonać za pomocą ustawień przeglądarki
-            internetowej. Ustawienia te mogą zostać zmienione w taki sposób, aby
-            blokować automatyczną obsługę plików cookies bądź informować o
-            każdorazowym zamieszczeniu cookies na Państwa urządzeniu. Szczegółowe
-            informacje o możliwości i sposobach obsługi plików cookies dostępne
-            są w ustawieniach przeglądarki internetowej.
-          </p>
-          <p>
-            Mogą Państwo w każdej chwili usunąć pliki cookies, korzystając z
-            dostępnych funkcji w przeglądarce internetowej, której Państwo
-            używają.
-          </p>
-          <p>
-            Ograniczenie stosowania plików cookies może wpłynąć na niektóre
-            funkcjonalności dostępne na stronie internetowej.
-          </p>
-          <p>
-            W celu wyświetlania Państwu spersonalizowanych reklam, dokonujemy
-            profilowania na zasadach przedstawionych poniżej.
-          </p>
-          <p>
-            Wykorzystujemy funkcję remarketingu Google AdWords, dzięki czemu
-            wyświetlamy Państwu reklamy naszej firmy w sieci reklamowej Google na
-            podstawie Państwa zachowania na stronie – odwiedzania konkretnych
-            podstron. Google wykorzystuje pliki cookie do wyświetlania reklam na
-            podstawie odwiedzin użytkowników w naszej witrynie. Mogą Państwo
-            zrezygnować z wyświetlania personalizowanych reklam Google w
-            ustawieniach reklam pod tym adresem:{" "}
-            <a
-              href="https://adssettings.google.pl/authenticated"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              https://adssettings.google.pl/authenticated
-            </a>
-            .
-          </p>
-          <p>
-            Wykorzystujemy również remarketing na portalu Facebook.com, który na
-            podstawie plików cookies zbieranych przez Facebooka na naszej stronie
-            wyświetla reklamy osobom, które odwiedziły naszą stronę lub są
-            podobne do takiej grupy osób. Facebook do celu tworzenia podobnych
-            grup odbiorców analizuje informacje udostępnione przez użytkowników
-            na portalu, dane z konta Facebook oraz aktywność w witrynach i
-            aplikacjach poza Facebookiem.
-          </p>
-          <p>
-            Wykorzystujemy reklamy Gmail Sponsored Promotions wyświetlanie w
-            poczcie Gmail. Kierujemy je remarketingowo, do osób odwiedzających
-            naszą stronę, a także na podstawie słów kluczowych, które system
-            Google dopasowuje do zainteresowań użytkowników oraz na podstawie
-            zainteresowań – do osób, które aktywnie poszukują informacji o
-            produktach i usługach. Jeśli chcą Państwo zrezygnować z reklam w
-            Gmailu personalizowanych na podstawie danych osobowych, prosimy to
-            zrobić na stronie:{" "}
-            <a
-              href="https://adssettings.google.com/authenticated"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              https://adssettings.google.com/authenticated
-            </a>
-          </p>
-          <p>
-            We wszystkich wymienionych wyżej systemach reklamowych dopasowujemy
-            również reklamy na podstawie kryteriów demograficznych i lokalizacji.
-          </p>
-          <p>
-            W celach analitycznych wykorzystujemy również narzędzie Google
-            Analytics, które za pośrednictwem plików cookies zbiera informacje o
-            Państwa zachowaniu na naszej stronie. Mogą państwo usunąć swoje dane
-            związane z plikami cookies z naszej bazy instalując dodatek do
-            przeglądarki z tej strony:{" "}
-            <a
-              href="https://tools.google.com/dlpage/gaoptout"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              https://tools.google.com/dlpage/gaoptout
-            </a>
-            . Dane o użytkownikach i zdarzeniach na naszej stronie przechowujemy
-            na serwerach Google Analytics.
+            uzyskiwania dostępu do Państwa urządzenia. Zmiany można wprowadzić
+            w ustawieniach przeglądarki internetowej — również tak, aby
+            blokować obsługę plików cookies lub informować o każdym ich
+            zapisaniu. Ograniczenie stosowania plików cookies może wpłynąć na
+            działanie serwisu, w szczególności uniemożliwić zalogowanie się.
           </p>
 
           <h2>Przekazywanie danych osobowych</h2>
           <h3>Dostawcy usług</h3>
           <p>
             Przekazujemy Państwa dane osobowe dostawcom usług, z których
-            korzystamy przy prowadzeniu serwisu. Dostawcy usług, którym
-            przekazujemy Państwa dane osobowe, w zależności od sytuacji, są
-            podmiotami przetwarzającymi albo administratorami. Wykaz dostawców, z
-            których usług korzystamy:
+            korzystamy przy prowadzeniu serwisu. W zależności od sytuacji są oni
+            podmiotami przetwarzającymi (działają wyłącznie na nasze polecenie)
+            albo administratorami (sami ustalają cele i sposoby przetwarzania).
+            Wykaz dostawców, z których usług korzystamy:
           </p>
           <div className="overflow-x-auto">
             <table>
               <thead>
                 <tr>
-                  <th>Nazwa spółki</th>
+                  <th>Nazwa</th>
                   <th>Świadczone usługi</th>
                   <th>Rola</th>
-                  <th>Lokalizacja</th>
+                  <th>Lokalizacja danych</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>Facebook Ireland Limited</td>
+                  <td>Supabase, Inc.</td>
                   <td>
-                    Kampanie reklamowe (w tym remarketing) oraz mierzenie ich
-                    skuteczności
+                    baza danych serwisu: konta klientów, zamówienia, adresy
+                    dostawy, obsługa logowania
                   </td>
-                  <td>Administrator</td>
-                  <td>Irlandia (Europejski Obszar Gospodarczy)</td>
+                  <td>Podmiot przetwarzający</td>
+                  <td>Irlandia (EOG); spółka z siedzibą w USA</td>
                 </tr>
                 <tr>
-                  <td>Google Inc. (Google Analytics)</td>
-                  <td>Usługi analityczne – mierzenie ruchu na stronie</td>
-                  <td>Administrator</td>
+                  <td>Netlify, Inc.</td>
+                  <td>hosting i udostępnianie serwisu</td>
+                  <td>Podmiot przetwarzający</td>
                   <td>USA (poza EOG)</td>
                 </tr>
                 <tr>
-                  <td>Google Ireland Limited (Google AdWords)</td>
+                  <td>Resend, Inc.</td>
                   <td>
-                    Kampanie reklamowe (w tym remarketing) oraz mierzenie ich
-                    skuteczności
+                    wysyłka wiadomości transakcyjnych, np. potwierdzeń zamówień
                   </td>
-                  <td>Administrator</td>
-                  <td>Irlandia (EOG)</td>
+                  <td>Podmiot przetwarzający</td>
+                  <td>USA (poza EOG)</td>
                 </tr>
                 <tr>
-                  <td>CyberFolks sp. z o.o.</td>
-                  <td>hosting i domena</td>
+                  <td>PayPro S.A. (Przelewy24)</td>
+                  <td>obsługa płatności online</td>
                   <td>Administrator</td>
                   <td>Polska (EOG)</td>
                 </tr>
@@ -281,25 +249,21 @@ export default function PrivacyPolicyPage() {
             </table>
           </div>
           <p>
-            Wykaz jest na bieżąco aktualizowany. Podmioty przetwarzające.
-            Korzystamy z dostawców, którzy przetwarzają Państwa dane osobowe
-            wyłącznie na nasze polecenie. Świadczą oni dla nas usługę hostingu,
-            dostarczają nam systemy do marketingu online, do wysyłki wiadomości
-            email, do obsługi systemu komentarzy na blogu oraz do analizy ruchu w
-            serwisie. Administratorzy. Korzystamy z dostawców, którzy nie działają
-            wyłącznie na nasze polecenie i sami ustalą cele i sposoby
-            wykorzystania Państwa danych osobowych. Świadczą oni dla nas usługi
-            kampanii reklamowych. Lokalizacja. Nasi dostawcy mają siedzibę głównie
-            w Polsce i w innych krajach Europejskiego Obszaru Gospodarczego (EOG),
-            np. w Irlandii. Niektórzy z nich mają siedzibę poza terytorium EOG. W
-            związku z przekazaniem Państwa danych poza terytorium EOG zadbaliśmy,
-            aby nasi dostawcy dawali gwarancje wysokiego stopnia ochrony danych
-            osobowych. Gwarancje te wynikają w szczególności ze zobowiązania do
-            stosowania standardowych klauzul umownych przyjętych przez Komisję
-            (UE) lub uczestnictwa w programie „Tarcza Prywatności” UE-USA. Mają
-            Państwo prawo żądać od nas przekazania kopii standardowych klauzul
-            umownych kierując zapytanie w sposób wskazany w punkcie 1 Polityki
-            Prywatności.
+            Operatorem płatności Przelewy24 jest PayPro S.A. z siedzibą w
+            Poznaniu, ul. Pastelowa 8, 60-198 Poznań, KRS 0000347935. PayPro
+            S.A. jest odrębnym administratorem Państwa danych w zakresie obsługi
+            płatności i informuje o ich przetwarzaniu we własnej polityce
+            prywatności.
+          </p>
+          <p>
+            <strong>Przekazywanie danych poza EOG.</strong> Dane naszego sklepu
+            — konta klientów i zamówienia — przechowywane są na serwerach
+            w Irlandii, czyli na terenie Europejskiego Obszaru Gospodarczego.
+            Część naszych dostawców ma jednak siedzibę w Stanach Zjednoczonych,
+            co oznacza, że ich personel może uzyskać dostęp do danych w celu
+            świadczenia i utrzymania usługi. Przekazywanie danych odbywa się na
+            podstawie standardowych klauzul umownych zatwierdzonych przez
+            Komisję Europejską.
           </p>
 
           <h3>Organy Państwowe</h3>

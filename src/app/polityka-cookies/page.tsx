@@ -42,8 +42,7 @@ export default function CookiePolicyPage() {
           <p>
             Cookies to niewielkie pliki tekstowe zapisywane na Twoim urządzeniu
             podczas korzystania z serwisu. Umożliwiają m.in. utrzymanie sesji
-            logowania, zapamiętanie zawartości koszyka oraz — za Twoją zgodą —
-            analizę ruchu i działania marketingowe.
+            logowania oraz zapamiętanie Twojej decyzji o cookies.
           </p>
 
           <h2>2. Rodzaje cookies, których używamy</h2>
@@ -53,30 +52,32 @@ export default function CookiePolicyPage() {
             można ich wyłączyć.
           </p>
           <p>
-            <strong>Analityczne</strong> — pomagają zrozumieć, jak używasz
-            serwisu (np. Google Analytics). Instalowane wyłącznie po wyrażeniu
-            zgody.
+            <strong>Analityczne i marketingowe — nie używamy ich.</strong> Nie
+            prowadzimy analityki internetowej, nie wyświetlamy reklam i nie
+            profilujemy Cię na potrzeby marketingu. W serwisie nie działa Google
+            Analytics, Google Ads ani narzędzia reklamowe Meta (Facebook).
           </p>
           <p>
-            <strong>Marketingowe</strong> — służą do wyświetlania i pomiaru
-            reklam (np. Google Ads). Instalowane wyłącznie po wyrażeniu zgody.
+            Zawartość koszyka przechowujemy w pamięci lokalnej przeglądarki
+            (localStorage), a nie w cookies. Dane te zostają na Twoim urządzeniu
+            i trafiają do nas dopiero w chwili złożenia zamówienia.
           </p>
 
           <h2>3. Zgoda i jej wycofanie</h2>
           <p>
-            Przy pierwszej wizycie wyświetlamy baner, w którym możesz zaakceptować
-            wszystkie cookies albo ograniczyć się do niezbędnych. Zgodę możesz w
-            każdej chwili zmienić lub wycofać, czyszcząc dane witryny w
-            przeglądarce (co spowoduje ponowne wyświetlenie baneru) lub zmieniając
-            ustawienia cookies w przeglądarce.
+            Ponieważ używamy wyłącznie cookies niezbędnych do działania sklepu,
+            nie prosimy Cię o zgodę na cookies — przepisy jej w tym przypadku nie
+            wymagają. Przy pierwszej wizycie pokazujemy jedynie krótką informację.
+            Wszystkie cookies możesz w każdej chwili usunąć, czyszcząc dane
+            witryny w przeglądarce.
           </p>
 
           <h2>4. Cookies podmiotów trzecich</h2>
           <p>
-            Po wyrażeniu zgody w serwisie mogą działać narzędzia dostawców
-            zewnętrznych, w szczególności Google (Google Analytics, Google Ads).
-            Przetwarzają one dane zgodnie z własnymi politykami prywatności.
-            Płatności obsługuje Przelewy24 (PayPro S.A.).
+            Nie osadzamy w serwisie narzędzi reklamowych ani analitycznych
+            podmiotów trzecich. Przy płatności online zostajesz przekierowany do
+            Przelewy24 (PayPro S.A.), które przetwarza dane zgodnie z własną
+            polityką prywatności.
           </p>
 
           <h2>5. Zarządzanie cookies w przeglądarce</h2>
