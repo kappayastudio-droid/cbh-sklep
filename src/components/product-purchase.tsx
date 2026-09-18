@@ -203,8 +203,8 @@ export function ProductPurchase({
             as="p"
             className="font-semibold text-foreground"
           >
-            {formatPriceNet(currentPriceNet)}{" "}
-            <span className="text-caption font-normal text-muted-foreground">
+            {formatPriceNet(currentPriceNet)}
+            <span className="ml-sm text-caption font-normal text-muted-foreground">
               netto / szt.
             </span>
           </Typography>

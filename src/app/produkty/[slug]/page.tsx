@@ -269,7 +269,9 @@ export default async function ProductPage({ params }: PageProps) {
                 imageAlt={p.name}
                 name={p.name}
                 shortDescription={p.shortDescription}
-                price={relatedPrices[p.slug] ?? ""}
+                price={relatedPrices[p.slug]?.price ?? ""}
+                oldPrice={relatedPrices[p.slug]?.oldPrice}
+                promoPct={relatedPrices[p.slug]?.promoPct}
                 isAuthenticated={canSeePrices}
               />
             ))}

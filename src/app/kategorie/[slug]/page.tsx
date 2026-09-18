@@ -109,7 +109,9 @@ export default async function CategoryPage({ params }: PageProps) {
             imageAlt={p.name}
             name={p.name}
             shortDescription={p.shortDescription}
-            price={prices[p.slug] ?? ""}
+            price={prices[p.slug]?.price ?? ""}
+            oldPrice={prices[p.slug]?.oldPrice}
+            promoPct={prices[p.slug]?.promoPct}
             isAuthenticated={canSeePrices}
           />
         ))}

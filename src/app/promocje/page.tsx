@@ -108,6 +108,7 @@ export default async function PromocjePage() {
                   shortDescription={p.shortDescription}
                   price={p.newPrice}
                   oldPrice={p.oldPrice}
+                  promoPct={p.discountPct}
                   isAuthenticated
                 />
               ))}

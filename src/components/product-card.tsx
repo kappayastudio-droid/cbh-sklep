@@ -24,6 +24,8 @@ export type ProductCardProps = {
   price: string
   /** Cena sprzed promocji (przekreślona) — opcjonalnie, tylko gdy isAuthenticated. */
   oldPrice?: string
+  /** Wysokość promocji w % — plakietka „−20%" obok ceny. */
+  promoPct?: number
   /** Stan zalogowania użytkownika. Domyślnie false → login-gated CTA. */
   isAuthenticated?: boolean
   /** Brak na stanie → przycisk wyłączony i komunikat zamiast CTA. */
@@ -39,6 +41,7 @@ export function ProductCard({
   shortDescription,
   price,
   oldPrice,
+  promoPct,
   isAuthenticated = false,
   available = true,
   className,
@@ -98,11 +101,16 @@ export function ProductCard({
               <Typography variant="subtitle1" as="span" className="font-semibold">
                 {price || "Cena na zapytanie"}
                 {price && (
-                  <span className="ml-2xs text-caption font-normal text-muted-foreground">
+                  <span className="ml-sm text-caption font-normal text-muted-foreground">
                     netto
                   </span>
                 )}
               </Typography>
+              {price && promoPct ? (
+                <span className="ml-xs rounded-full bg-[#8c3f2a] px-2 py-0.5 text-caption font-medium text-white">
+                  −{promoPct}%
+                </span>
+              ) : null}
             </div>
             {available ? (
               <Button

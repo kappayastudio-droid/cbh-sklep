@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 
 import { requireAdmin } from "@/lib/admin"
 import { ORDER_STATUSES } from "@/lib/format"
+import { sendAccountApproved } from "@/lib/email"
 import { createAdminClient } from "@/lib/supabase/admin"
 
 /** Zapis ceny (zł → grosze) i stanu magazynowego pojedynczego wariantu. */
@@ -73,7 +74,14 @@ export async function updateProduct(formData: FormData) {
   revalidatePath("/sklep")
 }
 
-/** Zatwierdzenie / cofnięcie zatwierdzenia klienta B2B. */
+/**
+ * Zatwierdzenie / cofnięcie zatwierdzenia klienta B2B.
+ *
+ * Po zatwierdzeniu wysyłamy klientowi maila — bez tego salon rejestruje się,
+ * czeka i nigdy się nie dowiaduje, że może już kupować. Mail leci WYŁĄCZNIE
+ * przy faktycznej zmianie „oczekuje" → „zatwierdzony", więc ponowne kliknięcie
+ * ani cofnięcie zatwierdzenia nikogo nie zasypuje wiadomościami.
+ */
 export async function setCustomerApproval(formData: FormData) {
   await requireAdmin()
 
@@ -82,7 +90,35 @@ export async function setCustomerApproval(formData: FormData) {
   if (!id) return
 
   const supabase = createAdminClient()
+
+  // Stan sprzed zmiany — decyduje, czy to jest nowe zatwierdzenie.
+  const { data: before } = await supabase
+    .from("profiles")
+    .select("is_approved, company_name")
+    .eq("id", id)
+    .maybeSingle()
+
   await supabase.from("profiles").update({ is_approved: approved }).eq("id", id)
+
+  const justApproved = approved && !before?.is_approved
+  if (justApproved) {
+    // Best-effort: awaria poczty nie może cofnąć zatwierdzenia konta.
+    try {
+      const { data: userRes } = await supabase.auth.admin.getUserById(id)
+      const email = userRes?.user?.email
+      if (email) {
+        await sendAccountApproved({
+          to: email,
+          customerName:
+            (userRes?.user?.user_metadata?.first_name as string | undefined) ||
+            undefined,
+          companyName: before?.company_name ?? undefined,
+        })
+      }
+    } catch (e) {
+      console.error("[admin] nie udało się wysłać maila o zatwierdzeniu:", e)
+    }
+  }
 
   revalidatePath("/admin/klienci")
 }

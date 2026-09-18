@@ -5,6 +5,7 @@ import * as React from "react"
 import { ProductCard } from "@/components/product-card"
 import { Typography } from "@/components/ui/typography"
 import { cn } from "@/lib/utils"
+import type { ListingPrice } from "@/lib/catalog"
 import type { Product } from "@/lib/products"
 import { isProductAvailable } from "@/lib/availability"
 
@@ -15,7 +16,7 @@ export function BrandProducts({
   isAuthenticated = false,
 }: {
   products: Product[]
-  prices?: Record<string, string>
+  prices?: Record<string, ListingPrice>
   isAuthenticated?: boolean
 }) {
   // Zbierz unikalne podkategorie występujące wśród produktów tej marki (z licznikiem).
@@ -83,7 +84,9 @@ export function BrandProducts({
             imageAlt={p.name}
             name={p.name}
             shortDescription={p.shortDescription}
-            price={prices[p.slug] ?? ""}
+            price={prices[p.slug]?.price ?? ""}
+            oldPrice={prices[p.slug]?.oldPrice}
+            promoPct={prices[p.slug]?.promoPct}
             isAuthenticated={isAuthenticated}
           />
         ))}
