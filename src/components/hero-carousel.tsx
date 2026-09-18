@@ -15,7 +15,7 @@ import {
 import { Typography } from "@/components/ui/typography"
 import { cn } from "@/lib/utils"
 
-type Slide = {
+export type Slide = {
   src: string
   alt: string
   eyebrow: string
@@ -25,43 +25,50 @@ type Slide = {
   ctaHref: string
 }
 
-const slides: Slide[] = [
-  {
-    src: "/hero-lhc.png",
-    alt: "LHC · liposomowe farby do włosów z wodą termalną",
-    eyebrow: "Nowość",
-    title: "LHC · liposomowe farby do włosów",
-    subtitle:
-      "Nowa generacja koloryzacji: system aktywacji liposomowej, woda termalna i olej arganowy dają trwały, lśniący kolor o niskiej zawartości amoniaku.",
-    ctaLabel: "Sprawdź",
-    ctaHref: "/produkty/liposomowe-farby-do-wlosow-1-1-5-100ml",
-  },
-  {
-    src: "/hero-2.png",
-    alt: "Bottox Effect — kuracja nawilżająca",
-    eyebrow: "Kuracja nawilżająca",
-    title: "Bottox Effect · głębokie nawilżenie",
-    subtitle:
-      "Kwas hialuronowy, kolagen i keratyna w jednym zabiegu. Włosy gładkie, błyszczące i odporniejsze na zniszczenie, bez prostowania.",
-    ctaLabel: "Zobacz produkt",
-    ctaHref: "/sklep",
-  },
-  {
-    src: "/banner-colorclean.jpg",
-    alt: "Color Clean — chusteczki do usuwania koloru",
-    eyebrow: "Color Clean",
-    title: "Chusteczki do usuwania koloru",
-    subtitle:
-      "Błyskawicznie usuwają plamy z farby ze skóry, bez szorowania i podrażnień. Z Aloe Vera i Pro-Witaminą B5, które pielęgnują skórę.",
-    ctaLabel: "Sprawdź",
-    ctaHref: "/produkty/color-clean-chusteczki",
-  },
-]
+/** Ile sekund stoi jeden slajd, zanim karuzela przejdzie dalej. */
+const AUTOPLAY_DELAY_MS = 6000
 
-export function HeroCarousel() {
+export function HeroCarousel({ slides }: { slides: Slide[] }) {
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
   const [count, setCount] = React.useState(0)
+
+  // Autoprzewijanie. Świadomie nie używamy wtyczki embla-carousel-autoplay:
+  // przy tym ustawieniu nie startowała, a własny licznik jest przewidywalny
+  // i widać dokładnie, co go zatrzymuje.
+  //  • najechanie myszą wstrzymuje (ktoś czyta) i zjechanie wznawia,
+  //  • ukryta karta nie przewija w tle,
+  //  • „ogranicz ruch" w systemie wyłącza ruch całkowicie.
+  React.useEffect(() => {
+    if (!api || slides.length < 2) return
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+
+    const root = api.rootNode()
+    let paused = false
+    const pause = () => {
+      paused = true
+    }
+    const resume = () => {
+      paused = false
+    }
+    root.addEventListener("mouseenter", pause)
+    root.addEventListener("mouseleave", resume)
+    root.addEventListener("focusin", pause)
+    root.addEventListener("focusout", resume)
+
+    const id = window.setInterval(() => {
+      if (paused || document.hidden) return
+      api.scrollNext()
+    }, AUTOPLAY_DELAY_MS)
+
+    return () => {
+      window.clearInterval(id)
+      root.removeEventListener("mouseenter", pause)
+      root.removeEventListener("mouseleave", resume)
+      root.removeEventListener("focusin", pause)
+      root.removeEventListener("focusout", resume)
+    }
+  }, [api, slides.length])
 
   React.useEffect(() => {
     if (!api) return
@@ -87,7 +94,7 @@ export function HeroCarousel() {
         <CarouselContent className="ml-0">
           {slides.map((slide, idx) => (
             <CarouselItem
-              key={slide.src}
+              key={slide.src + idx}
               className="basis-full pl-0"
             >
               <div className="flex flex-col md:grid md:h-[calc(100svh_-_var(--nav-h,4rem))] md:min-h-[560px] md:grid-cols-[2fr_3fr] lg:h-[calc((100svh_-_var(--nav-h,9.5rem))*0.66)] lg:min-h-[460px]">

@@ -4,6 +4,7 @@ import { Typography } from "@/components/ui/typography"
 import { getListingPrices, getVisibleProducts } from "@/lib/catalog"
 import { getSession } from "@/lib/auth"
 import { type Product } from "@/lib/products"
+import { isProductAvailable } from "@/lib/availability"
 
 // Wybrane bestsellery (kolejność zachowana).
 const BESTSELLER_SLUGS = [
@@ -35,12 +36,15 @@ export async function BestsellersSection() {
         {products.map((p) => (
           <ProductCard
             key={p.slug}
+            available={isProductAvailable(p)}
             href={`/produkty/${p.slug}`}
             image={p.image}
             imageAlt={p.name}
             name={p.name}
             shortDescription={p.shortDescription}
-            price={prices[p.slug] ?? ""}
+            price={prices[p.slug]?.price ?? ""}
+            oldPrice={prices[p.slug]?.oldPrice}
+            promoPct={prices[p.slug]?.promoPct}
             isAuthenticated={canSeePrices}
           />
         ))}

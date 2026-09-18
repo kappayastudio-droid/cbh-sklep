@@ -7,6 +7,7 @@ import { Check, ChevronDown, Minus, Plus, ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Typography } from "@/components/ui/typography"
 import { useCart } from "@/lib/cart/cart-context"
+import { UNAVAILABLE_LABEL } from "@/lib/availability"
 import { formatPriceNet } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import type { ProductVariant } from "@/lib/products"
@@ -28,8 +29,12 @@ type ProductPurchaseProps = {
   priceVariantId?: string
   /** Ceny netto (grosze) per UUID wariantu — tylko dla zatwierdzonych klientów. */
   prices?: Record<string, number>
+  /** Aktywne promocje per UUID wariantu: rabat % i cena sprzed promocji. */
+  promos?: Record<string, { pct: number; beforeNet: number }>
   /** Wybór wariantu i zakup dostępne wyłącznie dla zalogowanych klientów B2B. */
   isAuthenticated?: boolean
+  /** Stan magazynowy wariantu „default" (produkt bez wariantów). */
+  priceVariantInStock?: boolean
 }
 
 /**
@@ -46,7 +51,9 @@ export function ProductPurchase({
   productImage,
   priceVariantId,
   prices = {},
+  promos = {},
   isAuthenticated = false,
+  priceVariantInStock,
 }: ProductPurchaseProps) {
   const { addItem } = useCart()
   const available = React.useMemo(
@@ -65,13 +72,9 @@ export function ProductPurchase({
   const [justAdded, setJustAdded] = React.useState(false)
 
   const selectedVariant = available.find((v) => v.value === selected)
-  const currentPriceNet = hasVariants
-    ? selectedVariant?.id
-      ? prices[selectedVariant.id]
-      : undefined
-    : priceVariantId
-      ? prices[priceVariantId]
-      : undefined
+  const currentVariantId = hasVariants ? selectedVariant?.id : priceVariantId
+  const currentPriceNet = currentVariantId ? prices[currentVariantId] : undefined
+  const currentPromo = currentVariantId ? promos[currentVariantId] : undefined
 
   // Gość — bez wyboru pojemności, tylko bramka logowania.
   if (!isAuthenticated) {
@@ -92,7 +95,12 @@ export function ProductPurchase({
     )
   }
 
-  const canAddToCart = !hasVariants || selected !== null
+  // Brak na stanie: dla produktu z wariantami żaden nie jest dostępny,
+  // dla produktu bez wariantów — jego wariant „default" jest wyłączony.
+  const inStock = hasVariants
+    ? available.length > 0
+    : priceVariantInStock !== false
+  const canAddToCart = inStock && (!hasVariants || selected !== null)
 
   function handleAdd() {
     if (!canAddToCart) return
@@ -189,12 +197,28 @@ export function ProductPurchase({
 
       {/* Pojedyncza cena — wybranego wariantu lub produktu bez wariantów */}
       {typeof currentPriceNet === "number" && currentPriceNet > 0 ? (
-        <Typography variant="h5" as="p" className="font-semibold text-foreground">
-          {formatPriceNet(currentPriceNet)}{" "}
-          <span className="text-caption font-normal text-muted-foreground">
-            netto / szt.
-          </span>
-        </Typography>
+        <div className="flex flex-wrap items-baseline gap-sm">
+          <Typography
+            variant="h5"
+            as="p"
+            className="font-semibold text-foreground"
+          >
+            {formatPriceNet(currentPriceNet)}
+            <span className="ml-sm text-caption font-normal text-muted-foreground">
+              netto / szt.
+            </span>
+          </Typography>
+          {currentPromo && currentPromo.beforeNet > currentPriceNet && (
+            <>
+              <span className="text-body2 text-muted-foreground line-through">
+                {formatPriceNet(currentPromo.beforeNet)}
+              </span>
+              <span className="rounded-full bg-[#8c3f2a] px-2 py-0.5 text-caption font-medium text-white">
+                −{Math.round(currentPromo.pct)}%
+              </span>
+            </>
+          )}
+        </div>
       ) : (
         canAddToCart && (
           <p className="text-[14px] text-muted-foreground">Cena na zapytanie</p>
@@ -210,8 +234,14 @@ export function ProductPurchase({
           disabled={!canAddToCart}
           className="h-12 w-full gap-2xs bg-primary text-base text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground sm:w-auto sm:flex-1 sm:px-lg"
         >
-          <ShoppingBag className="size-4" aria-hidden />
-          Dodaj do koszyka
+          {inStock ? (
+            <>
+              <ShoppingBag className="size-4" aria-hidden />
+              Dodaj do koszyka
+            </>
+          ) : (
+            UNAVAILABLE_LABEL
+          )}
         </Button>
 
         <div className="flex h-12 w-full items-center justify-between border border-border sm:w-auto sm:justify-start">
@@ -240,6 +270,13 @@ export function ProductPurchase({
           </button>
         </div>
       </div>
+
+      {!inStock && (
+        <p className="text-[14px] text-muted-foreground">
+          Tego produktu chwilowo nie ma w magazynie. Napisz do nas, a damy znać,
+          gdy wróci na stan.
+        </p>
+      )}
 
       {justAdded ? (
         <p className="inline-flex items-center gap-2xs text-[14px] text-[#787169]">

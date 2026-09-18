@@ -3,6 +3,7 @@ import "server-only"
 import { Resend } from "resend"
 
 import { formatPriceNet, grossFromNet, vatFromNet } from "@/lib/format"
+import { SITE_URL } from "@/lib/site"
 
 /**
  * Wysyłka e-maili transakcyjnych (Resend).
@@ -175,6 +176,105 @@ export async function sendOrderConfirmation(
     return true
   } catch (e) {
     console.error("[email] wyjątek przy wysyłce:", e)
+    return false
+  }
+}
+
+/**
+ * Powiadomienie o zatwierdzeniu konta B2B.
+ *
+ * To NIE jest informacja handlowa — to wiadomość o statusie konta, o które
+ * klient sam poprosił, więc nie wymaga zgody marketingowej (art. 398 PKE
+ * dotyczy marketingu, nie obsługi konta). Nie umieszczamy tu żadnej oferty,
+ * ceny ani promocji; dopisanie ich zmieniłoby charakter wiadomości.
+ */
+type AccountApprovedInput = {
+  to: string
+  customerName?: string
+  companyName?: string
+}
+
+function renderAccountApprovedHtml({
+  customerName,
+  companyName,
+}: Omit<AccountApprovedInput, "to">): string {
+  const greeting = customerName
+    ? `Dzień dobry, ${escapeHtml(customerName)}!`
+    : "Dzień dobry!"
+  const who = companyName
+    ? ` dla firmy <strong>${escapeHtml(companyName)}</strong>`
+    : ""
+
+  return `<!doctype html>
+<html lang="pl">
+  <body style="margin:0;background:#f0efeb;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#26241f;">
+    <div style="max-width:560px;margin:0 auto;padding:32px 20px;">
+      <div style="background:#787169;color:#fff;padding:20px 24px;">
+        <div style="font-size:18px;font-weight:600;letter-spacing:.02em;">CBH Polska</div>
+      </div>
+      <div style="background:#fdfcfa;border:1px solid #dedcd4;border-top:none;padding:24px;">
+        <h1 style="margin:0 0 4px;font-size:20px;">Konto zostało zatwierdzone</h1>
+        <p style="margin:0 0 20px;color:#5c584f;font-size:14px;line-height:1.6;">
+          ${greeting} Twoje konto hurtowe${who} jest już aktywne.
+          Po zalogowaniu zobaczysz swoje ceny i możesz składać zamówienia online.
+        </p>
+
+        <a href="${SITE_URL}/login"
+           style="display:inline-block;background:#26241f;color:#f0efeb;text-decoration:none;padding:12px 22px;font-size:14px;font-weight:600;">
+          Zaloguj się
+        </a>
+
+        <p style="margin:20px 0 0;color:#5c584f;font-size:13px;line-height:1.6;">
+          Nie pamiętasz hasła? Ustaw nowe na
+          <a href="${SITE_URL}/reset-hasla" style="color:#787169;">${SITE_URL.replace(
+            /^https?:\/\//,
+            ""
+          )}/reset-hasla</a> —
+          wpisz swój adres e-mail, a wyślemy link do ustawienia hasła.
+        </p>
+
+        <p style="margin:18px 0 0;color:#8a857c;font-size:12px;line-height:1.6;">
+          Jeśli coś nie działa albo wolisz złożyć zamówienie jak dotąd — telefonicznie
+          lub mailem — po prostu odpowiedz na tę wiadomość. Odbieramy tak samo jak wcześniej.
+        </p>
+      </div>
+      <p style="margin:16px 0 0;color:#a8a49b;font-size:11px;text-align:center;">
+        CBH Polska — hurtownia kosmetyków fryzjerskich
+      </p>
+    </div>
+  </body>
+</html>`
+}
+
+/**
+ * Wysyła klientowi informację, że jego konto B2B zostało zatwierdzone.
+ * Zwraca `true` przy sukcesie, `false` gdy pominięto (brak klucza) lub błąd.
+ * Nigdy nie rzuca — zatwierdzenie konta nie może paść przez awarię poczty.
+ */
+export async function sendAccountApproved(
+  input: AccountApprovedInput
+): Promise<boolean> {
+  const resend = client()
+  if (!resend) {
+    console.warn(
+      "[email] RESEND_API_KEY nie ustawiony — pomijam mail o zatwierdzeniu konta."
+    )
+    return false
+  }
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM,
+      to: input.to,
+      subject: "Konto zatwierdzone — możesz już składać zamówienia · CBH Polska",
+      html: renderAccountApprovedHtml(input),
+    })
+    if (error) {
+      console.error("[email] Resend error (zatwierdzenie konta):", error)
+      return false
+    }
+    return true
+  } catch (e) {
+    console.error("[email] wyjątek przy wysyłce (zatwierdzenie konta):", e)
     return false
   }
 }

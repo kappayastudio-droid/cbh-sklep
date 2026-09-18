@@ -2,6 +2,8 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
+import { NipField } from "@/components/nip-field"
+
 import { signup } from "@/app/rejestracja/actions"
 import { PageBanner } from "@/components/layout/page-banner"
 import { Button } from "@/components/ui/button"
@@ -76,8 +78,18 @@ export default async function RejestracjaPage({
             role="status"
             className="mb-md rounded-lg border border-[#787169]/30 bg-[#787169]/10 px-md py-sm text-body2 text-foreground"
           >
-            Konto zostało utworzone. Po weryfikacji adresu e-mail poczekaj na
-            zatwierdzenie konta B2B — damy znać, gdy ceny będą widoczne.
+            {success === "review" ? (
+              <>
+                Konto zostało utworzone. Potwierdź adres e-mail — wysłaliśmy
+                link. Sprawdzamy jeszcze dane firmy, zwykle do następnego dnia
+                roboczego; damy znać mailem, gdy ceny będą widoczne.
+              </>
+            ) : (
+              <>
+                Konto gotowe. Potwierdź adres e-mail — wysłaliśmy link. Po
+                zalogowaniu zobaczysz swoje ceny.
+              </>
+            )}
           </div>
         )}
         {error && (
@@ -140,7 +152,7 @@ export default async function RejestracjaPage({
               placeholder="Wpisz tutaj nazwę swojej firmy..."
               autoComplete="organization"
             />
-            <Field id="nip" label="NIP" required placeholder="Wpisz NIP" />
+            <NipField />
             <Field
               id="address1"
               label="Ulica i numer"

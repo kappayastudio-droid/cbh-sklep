@@ -5,7 +5,7 @@ import { Download } from "lucide-react"
 
 import type { AdminOrder } from "@/lib/admin"
 import { formatDate } from "@/lib/format"
-import { computeOrderTotals } from "@/lib/pricing"
+import { storedOrLegacyTotals } from "@/lib/pricing"
 
 /**
  * Eksport danych do faktur — opłacone zamówienia, jeden wiersz na pozycję
@@ -61,7 +61,13 @@ export function InvoiceExport({ orders }: { orders: AdminOrder[] }) {
         )
       }
       // Rabat i dostawa jako osobne pozycje (aby suma = wartość zamówienia).
-      const t = computeOrderTotals(
+      const t = storedOrLegacyTotals(
+        {
+          subtotalNet: o.subtotalNet,
+          discountNet: o.discountNet,
+          shippingNet: o.shippingNet,
+          totalNet: o.totalNet,
+        },
         o.items.reduce((s, it) => s + it.unitPriceNet * it.qty, 0)
       )
       if (t.discountPct > 0) {

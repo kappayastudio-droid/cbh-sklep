@@ -40,11 +40,13 @@ export function CheckoutForm({ defaults }: { defaults: Defaults }) {
   }
 
   const priced = items.filter((i) => typeof i.unitPriceNet === "number")
-  const subtotalNet = priced.reduce(
-    (sum, i) => sum + (i.unitPriceNet ?? 0) * i.qty,
-    0
+  const totals = computeOrderTotals(
+    priced.map((i) => ({
+      slug: i.productSlug,
+      qty: i.qty,
+      unitPriceNet: i.unitPriceNet ?? 0,
+    }))
   )
-  const totals = computeOrderTotals(subtotalNet)
   const itemsPayload = JSON.stringify(
     items.map((i) => ({
       slug: i.productSlug,
@@ -134,7 +136,7 @@ export function CheckoutForm({ defaults }: { defaults: Defaults }) {
               </span>
               <span className="shrink-0 tabular-nums">
                 {typeof i.unitPriceNet === "number"
-                  ? formatPriceNet(i.unitPriceNet * i.qty)
+                  ? `${formatPriceNet(i.unitPriceNet * i.qty)} netto`
                   : "—"}
               </span>
             </li>

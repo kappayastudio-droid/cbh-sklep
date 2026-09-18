@@ -59,11 +59,14 @@ async function fetchCatalog(): Promise<CatalogData | null> {
 
     const variantsByProduct = new Map<string, ProductVariant[]>()
     const defaultVariantByProduct = new Map<string, string>()
+    const defaultStockByProduct = new Map<string, boolean>()
     for (const v of varRes.data ?? []) {
       // "default" to syntetyczny wariant z seeda (produkt bez wariantów) —
-      // nie pokazujemy go jako opcji, ale zapamiętujemy jako nośnik ceny.
+      // nie pokazujemy go jako opcji, ale zapamiętujemy jako nośnik ceny
+      // ORAZ jego stan magazynowy (panel ustawia go przy tym wierszu).
       if (v.value === "default") {
         defaultVariantByProduct.set(v.product_id, v.id)
+        defaultStockByProduct.set(v.product_id, v.in_stock)
         continue
       }
       const arr = variantsByProduct.get(v.product_id) ?? []
@@ -88,6 +91,7 @@ async function fetchCatalog(): Promise<CatalogData | null> {
       variantAttribute: p.variant_attribute ?? "",
       variants: variantsByProduct.get(p.id) ?? [],
       priceVariantId: defaultVariantByProduct.get(p.id),
+      priceVariantInStock: defaultStockByProduct.get(p.id),
     }))
 
     const categories: Category[] = (catRes.data ?? []).map((c) => ({
@@ -197,24 +201,58 @@ export async function getRelatedProducts(
  * RPC `variant_prices` zwraca pusto dla gościa/niezatwierdzonego, więc ceny
  * nigdy nie wyciekają. Zwraca mapę { variantId: price_net }.
  */
-export async function getVariantPrices(
-  variantIds: string[]
-): Promise<Record<string, number>> {
-  if (!configured() || variantIds.length === 0) return {}
+export type VariantPromo = {
+  /** Aktywny rabat promocyjny % (0 = brak promocji). */
+  pct: number
+  /** Cena sprzed promocji (grosze) — do przekreślenia w sklepie. */
+  beforeNet: number
+}
+
+/**
+ * Ceny + promocje w jednym wywołaniu RPC.
+ * Zwraca pusto dla gościa/niezatwierdzonego, więc ceny nigdy nie wyciekają.
+ */
+export async function getVariantPricing(variantIds: string[]): Promise<{
+  prices: Record<string, number>
+  promos: Record<string, VariantPromo>
+}> {
+  const empty = { prices: {}, promos: {} }
+  if (!configured() || variantIds.length === 0) return empty
   try {
     const supabase = await createClient()
     const { data, error } = await supabase.rpc("variant_prices", {
       p_variant_ids: variantIds,
     })
-    if (error || !data) return {}
-    const out: Record<string, number> = {}
-    for (const row of data as { variant_id: string; price_net: number }[]) {
-      out[row.variant_id] = row.price_net
+    if (error || !data) return empty
+    const prices: Record<string, number> = {}
+    const promos: Record<string, VariantPromo> = {}
+    for (const row of data as {
+      variant_id: string
+      price_net: number
+      promo_pct: number | null
+      price_before_promo_net: number | null
+    }[]) {
+      prices[row.variant_id] = row.price_net
+      const pct = Number(row.promo_pct ?? 0)
+      if (pct > 0) {
+        promos[row.variant_id] = {
+          pct,
+          beforeNet: row.price_before_promo_net ?? row.price_net,
+        }
+      }
     }
-    return out
+    return { prices, promos }
   } catch {
-    return {}
+    return empty
   }
+}
+
+/** Same ceny netto (grosze) per wariant — dla miejsc, które nie pokazują promocji. */
+export async function getVariantPrices(
+  variantIds: string[]
+): Promise<Record<string, number>> {
+  const { prices } = await getVariantPricing(variantIds)
+  return prices
 }
 
 /**
@@ -222,9 +260,23 @@ export async function getVariantPrices(
  * (albo "od 69,00 zł" gdy warianty mają różne ceny). Dla gościa/niezatwierdzonego —
  * pusta mapa (RPC nie wydaje cen), więc karty pokazują bramkę logowania.
  */
+export type ListingPrice = {
+  /** Cena do pokazania, np. "35,00 zł" albo "od 35,00 zł". */
+  price: string
+  /** Cena sprzed promocji (do przekreślenia) — tylko gdy promocja jest aktywna. */
+  oldPrice?: string
+  /** Wysokość promocji w % — do plakietki „−20%". */
+  promoPct?: number
+}
+
+/**
+ * Ceny na kafelki listy. Zwraca też cenę sprzed promocji, żeby kafelek mógł
+ * pokazać przecenę tak samo jak karta produktu — wcześniej promocja była
+ * widoczna dopiero po wejściu w produkt.
+ */
 export async function getListingPrices(
   products: Product[]
-): Promise<Record<string, string>> {
+): Promise<Record<string, ListingPrice>> {
   const ids: string[] = []
   for (const p of products) {
     if (p.variants.length) {
@@ -234,23 +286,37 @@ export async function getListingPrices(
     }
   }
   if (ids.length === 0) return {}
-  const priceMap = await getVariantPrices(ids)
+  const { prices: priceMap, promos } = await getVariantPricing(ids)
   if (Object.keys(priceMap).length === 0) return {}
 
-  const out: Record<string, string> = {}
+  const out: Record<string, ListingPrice> = {}
   for (const p of products) {
-    let vals: number[] = []
-    if (p.variants.length) {
-      vals = p.variants
-        .map((v) => (v.id ? priceMap[v.id] : undefined))
-        .filter((n): n is number => typeof n === "number" && n > 0)
-    } else if (p.priceVariantId && priceMap[p.priceVariantId] > 0) {
-      vals = [priceMap[p.priceVariantId]]
+    const variantIds = p.variants.length
+      ? p.variants.map((v) => v.id).filter((id): id is string => Boolean(id))
+      : p.priceVariantId
+        ? [p.priceVariantId]
+        : []
+
+    const priced = variantIds
+      .map((id) => ({ id, net: priceMap[id] }))
+      .filter((x) => typeof x.net === "number" && x.net > 0)
+    if (!priced.length) continue
+
+    // Kafelek pokazuje najniższą cenę — i promocję tego właśnie wariantu.
+    const cheapest = priced.reduce((a, b) => (b.net < a.net ? b : a))
+    const multiple = new Set(priced.map((x) => x.net)).size > 1
+    const promo = promos[cheapest.id]
+
+    out[p.slug] = {
+      price: (multiple ? "od " : "") + formatPriceNet(cheapest.net),
+      ...(promo && promo.beforeNet > cheapest.net
+        ? {
+            oldPrice: formatPriceNet(promo.beforeNet),
+            promoPct: Math.round(promo.pct),
+          }
+        : {}),
     }
-    if (!vals.length) continue
-    const min = Math.min(...vals)
-    const multiple = new Set(vals).size > 1
-    out[p.slug] = (multiple ? "od " : "") + formatPriceNet(min)
   }
   return out
 }
+

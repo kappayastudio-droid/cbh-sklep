@@ -8,6 +8,7 @@ import { Section } from "@/components/ui/section"
 import { Typography } from "@/components/ui/typography"
 import { getListingPrices, getVisibleProducts } from "@/lib/catalog"
 import { getSession } from "@/lib/auth"
+import { isProductAvailable } from "@/lib/availability"
 
 export const metadata: Metadata = {
   title: "Sklep — CBH Polska",
@@ -106,12 +107,15 @@ export default async function ShopPage({ searchParams }: PageProps) {
           {products.map((p) => (
             <ProductCard
               key={p.slug}
+              available={isProductAvailable(p)}
               href={`/produkty/${p.slug}`}
               image={p.image}
               imageAlt={p.name}
               name={p.name}
               shortDescription={p.shortDescription}
-              price={prices[p.slug] ?? ""}
+              price={prices[p.slug]?.price ?? ""}
+              oldPrice={prices[p.slug]?.oldPrice}
+              promoPct={prices[p.slug]?.promoPct}
               isAuthenticated={canSeePrices}
             />
           ))}

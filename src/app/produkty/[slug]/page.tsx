@@ -12,12 +12,13 @@ import {
   getListingPrices,
   getProductBySlug,
   getRelatedProducts,
-  getVariantPrices,
+  getVariantPricing,
   getVisibleProducts,
 } from "@/lib/catalog"
 import { getSession } from "@/lib/auth"
 import { breadcrumbLd } from "@/lib/jsonld"
 import { SITE_URL } from "@/lib/site"
+import { isProductAvailable } from "@/lib/availability"
 
 type PageProps = {
   params: Promise<{ slug: string }>
@@ -89,7 +90,9 @@ export default async function ProductPage({ params }: PageProps) {
     : product.priceVariantId
       ? [product.priceVariantId]
       : []
-  const priceMap = canSeePrices ? await getVariantPrices(variantIds) : {}
+  const { prices: priceMap, promos: promoMap } = canSeePrices
+    ? await getVariantPricing(variantIds)
+    : { prices: {}, promos: {} }
   const relatedPrices = canSeePrices ? await getListingPrices(related) : {}
 
   // Dane strukturalne produktu (bez ceny — ceny są tylko dla zalogowanych B2B).
@@ -209,6 +212,8 @@ export default async function ProductPage({ params }: PageProps) {
               productImage={product.image}
               priceVariantId={product.priceVariantId}
               prices={priceMap}
+              promos={promoMap}
+              priceVariantInStock={product.priceVariantInStock}
               isAuthenticated={canSeePrices}
             />
 
@@ -258,12 +263,15 @@ export default async function ProductPage({ params }: PageProps) {
             {related.slice(0, 4).map((p) => (
               <ProductCard
                 key={p.slug}
+                available={isProductAvailable(p)}
                 href={`/produkty/${p.slug}`}
                 image={p.image}
                 imageAlt={p.name}
                 name={p.name}
                 shortDescription={p.shortDescription}
-                price={relatedPrices[p.slug] ?? ""}
+                price={relatedPrices[p.slug]?.price ?? ""}
+                oldPrice={relatedPrices[p.slug]?.oldPrice}
+                promoPct={relatedPrices[p.slug]?.promoPct}
                 isAuthenticated={canSeePrices}
               />
             ))}

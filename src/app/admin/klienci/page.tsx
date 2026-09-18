@@ -1,12 +1,16 @@
 import { setCustomerApproval } from "@/app/admin/actions"
+import { CustomerDiscount } from "@/components/admin/customer-discount"
 import { Button } from "@/components/ui/button"
 import { Typography } from "@/components/ui/typography"
-import { adminListCustomers } from "@/lib/admin"
+import { adminListCustomers, adminListPriceLists } from "@/lib/admin"
 
 export const dynamic = "force-dynamic"
 
 export default async function AdminCustomersPage() {
-  const customers = await adminListCustomers()
+  const [customers, priceLists] = await Promise.all([
+    adminListCustomers(),
+    adminListPriceLists(),
+  ])
   const pending = customers.filter((c) => !c.isApproved && c.role !== "admin")
 
   return (
@@ -17,6 +21,20 @@ export default async function AdminCustomersPage() {
           : "Brak kont oczekujących na zatwierdzenie."}
       </Typography>
 
+      <Typography variant="caption" className="text-muted-foreground">
+        Konta z potwierdzonym NIP-em zatwierdzają się same. Poniżej widzisz te,
+        których wykaz VAT nie potwierdził — najczęściej firmy zwolnione z VAT,
+        które w wykazie po prostu nie figurują. To normalne, wystarczy sprawdzić
+        i kliknąć „Zatwierdź".
+      </Typography>
+
+      {priceLists.length === 0 && (
+        <Typography variant="body2" className="text-muted-foreground">
+          Nie masz jeszcze żadnego cennika rabatowego — dodaj go w zakładce
+          „Rabaty”, żeby móc przypisywać klientom indywidualne rabaty.
+        </Typography>
+      )}
+
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-body2">
           <thead>
@@ -24,6 +42,7 @@ export default async function AdminCustomersPage() {
               <th className="py-sm pr-md font-medium text-muted-foreground">E-mail</th>
               <th className="py-sm pr-md font-medium text-muted-foreground">Firma</th>
               <th className="py-sm pr-md font-medium text-muted-foreground">Status</th>
+              <th className="py-sm pr-md font-medium text-muted-foreground">Rabat</th>
               <th className="py-sm font-medium text-muted-foreground">Akcja</th>
             </tr>
           </thead>
@@ -44,9 +63,27 @@ export default async function AdminCustomersPage() {
                       zatwierdzony
                     </span>
                   ) : (
-                    <span className="rounded-full border border-border px-2 py-0.5 text-caption text-muted-foreground">
-                      oczekuje
-                    </span>
+                    <div className="flex flex-col gap-2xs">
+                      <span className="w-fit rounded-full border border-border px-2 py-0.5 text-caption text-muted-foreground">
+                        oczekuje
+                      </span>
+                      {c.verificationNote && (
+                        <span className="max-w-[22rem] text-caption text-muted-foreground">
+                          {c.verificationNote}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </td>
+                <td className="py-sm pr-md">
+                  {c.role === "admin" ? (
+                    <span className="text-muted-foreground">—</span>
+                  ) : (
+                    <CustomerDiscount
+                      profileId={c.id}
+                      priceListId={c.priceListId}
+                      priceLists={priceLists}
+                    />
                   )}
                 </td>
                 <td className="py-sm">

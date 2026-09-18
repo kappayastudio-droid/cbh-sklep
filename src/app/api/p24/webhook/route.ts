@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server"
 
 import { sendOrderConfirmation } from "@/lib/email"
 import { grossFromNet } from "@/lib/format"
-import { computeOrderTotals } from "@/lib/pricing"
+import { storedOrLegacyTotals } from "@/lib/pricing"
 import { verifyNotificationSign, verifyTransaction } from "@/lib/p24"
 import { createAdminClient } from "@/lib/supabase/admin"
 
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
   // 2) Zamówienie po sessionId (= id zamówienia).
   const { data: order } = await admin
     .from("orders")
-    .select("id, status, total_net, profile_id")
+    .select("id, status, total_net, profile_id, subtotal_net, discount_net, shipping_net")
     .eq("p24_session_id", p.sessionId)
     .maybeSingle()
 
@@ -90,11 +90,16 @@ export async function POST(request: NextRequest) {
     ])
     const email = userRes?.user?.email
     if (email) {
-      const subtotalNet = (items ?? []).reduce(
-        (s, it) => s + it.unit_price_net * it.qty,
-        0
+      // Kwoty bierzemy z zamówienia (migracja 0003) — NIE liczymy od nowa.
+      const totals = storedOrLegacyTotals(
+        {
+          subtotalNet: order.subtotal_net ?? null,
+          discountNet: order.discount_net ?? null,
+          shippingNet: order.shipping_net ?? null,
+          totalNet: order.total_net,
+        },
+        (items ?? []).reduce((s, it) => s + it.unit_price_net * it.qty, 0)
       )
-      const totals = computeOrderTotals(subtotalNet)
       await sendOrderConfirmation({
         to: email,
         orderId: order.id,

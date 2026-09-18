@@ -3,6 +3,7 @@ import Link from "next/link"
 import { ShoppingBag } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { UNAVAILABLE_LABEL } from "@/lib/availability"
 import { Typography } from "@/components/ui/typography"
 import { cn } from "@/lib/utils"
 
@@ -23,8 +24,12 @@ export type ProductCardProps = {
   price: string
   /** Cena sprzed promocji (przekreślona) — opcjonalnie, tylko gdy isAuthenticated. */
   oldPrice?: string
+  /** Wysokość promocji w % — plakietka „−20%" obok ceny. */
+  promoPct?: number
   /** Stan zalogowania użytkownika. Domyślnie false → login-gated CTA. */
   isAuthenticated?: boolean
+  /** Brak na stanie → przycisk wyłączony i komunikat zamiast CTA. */
+  available?: boolean
   className?: string
 }
 
@@ -36,7 +41,9 @@ export function ProductCard({
   shortDescription,
   price,
   oldPrice,
+  promoPct,
   isAuthenticated = false,
+  available = true,
   className,
 }: ProductCardProps) {
   return (
@@ -93,16 +100,37 @@ export function ProductCard({
               )}
               <Typography variant="subtitle1" as="span" className="font-semibold">
                 {price || "Cena na zapytanie"}
+                {price && (
+                  <span className="ml-sm text-caption font-normal text-muted-foreground">
+                    netto
+                  </span>
+                )}
               </Typography>
+              {price && promoPct ? (
+                <span className="ml-xs rounded-full bg-[#8c3f2a] px-2 py-0.5 text-caption font-medium text-white">
+                  −{promoPct}%
+                </span>
+              ) : null}
             </div>
-            <Button
-              size="lg"
-              className="mt-md w-full justify-between bg-primary font-medium text-primary-foreground hover:bg-primary/90"
-              render={<Link href={href} />}
-            >
-              <span>Do koszyka</span>
-              <ShoppingBag className="size-4" aria-hidden />
-            </Button>
+            {available ? (
+              <Button
+                size="lg"
+                className="mt-md w-full justify-between bg-primary font-medium text-primary-foreground hover:bg-primary/90"
+                render={<Link href={href} />}
+              >
+                <span>Do koszyka</span>
+                <ShoppingBag className="size-4" aria-hidden />
+              </Button>
+            ) : (
+              <Button
+                size="lg"
+                disabled
+                className="mt-md w-full justify-center font-medium"
+                aria-label={`${name} — ${UNAVAILABLE_LABEL}`}
+              >
+                {UNAVAILABLE_LABEL}
+              </Button>
+            )}
           </>
         ) : (
           <>
@@ -113,6 +141,11 @@ export function ProductCard({
               <UserIcon className="size-4 shrink-0" aria-hidden />
               Zaloguj się, aby zobaczyć cenę
             </Link>
+            {!available && (
+              <p className="mt-sm text-caption text-muted-foreground">
+                {UNAVAILABLE_LABEL}
+              </p>
+            )}
             <Button
               size="lg"
               className="mt-md w-full border-[#787169] bg-[#787169] font-medium text-white hover:bg-[#6c665f]"

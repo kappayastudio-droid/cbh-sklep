@@ -21,6 +21,10 @@ export type AdminVariant = {
   value: string
   basePrice: number
   inStock: boolean
+  /** Rabat promocyjny % (0 = brak). */
+  promoPct: number
+  /** Ostatni dzień promocji (YYYY-MM-DD) albo null = bezterminowa. */
+  promoUntil: string | null
 }
 
 export type AdminProduct = {
@@ -40,7 +44,9 @@ export async function adminListCatalog(): Promise<AdminProduct[]> {
       supabase.from("products").select("id, slug, name, brand_id").order("name"),
       supabase
         .from("variants")
-        .select("id, product_id, value, base_price, in_stock, sort")
+        .select(
+          "id, product_id, value, base_price, in_stock, sort, promo_pct, promo_until"
+        )
         .order("sort"),
       supabase.from("brands").select("id, name"),
     ])
@@ -53,6 +59,8 @@ export async function adminListCatalog(): Promise<AdminProduct[]> {
       value: v.value,
       basePrice: v.base_price,
       inStock: v.in_stock,
+      promoPct: Number(v.promo_pct ?? 0),
+      promoUntil: v.promo_until ?? null,
     })
     byProduct.set(v.product_id, arr)
   }
@@ -75,23 +83,36 @@ export type AdminCustomer = {
   role: string
   isApproved: boolean
   createdAt: string
+  /** Przypisany cennik rabatowy (null = ceny bazowe, bez rabatu). */
+  priceListId: string | null
+  priceListName: string | null
+  discountPct: number
+  /** Powód oczekiwania z automatycznej weryfikacji NIP (null = konto sprzed tej funkcji). */
+  verificationNote: string | null
+  verificationOutcome: string | null
 }
 
-/** Lista klientów (auth.users + profiles) — do zatwierdzania w panelu. */
+/** Lista klientów (auth.users + profiles) — do zatwierdzania i rabatów w panelu. */
 export async function adminListCustomers(): Promise<AdminCustomer[]> {
   const supabase = createAdminClient()
-  const [{ data: usersData }, { data: profiles }] = await Promise.all([
-    supabase.auth.admin.listUsers(),
-    supabase.from("profiles").select("id, role, is_approved, company_name"),
-  ])
+  const [{ data: usersData }, { data: profiles }, { data: lists }] =
+    await Promise.all([
+      supabase.auth.admin.listUsers(),
+      supabase
+        .from("profiles")
+        .select(
+          "id, role, is_approved, company_name, price_list_id, verification_note, verification_outcome"
+        ),
+      supabase.from("price_lists").select("id, name, discount_pct"),
+    ])
 
-  const profileById = new Map(
-    (profiles ?? []).map((p) => [p.id, p])
-  )
+  const profileById = new Map((profiles ?? []).map((p) => [p.id, p]))
+  const listById = new Map((lists ?? []).map((l) => [l.id, l]))
 
   return (usersData?.users ?? [])
     .map((u) => {
       const p = profileById.get(u.id)
+      const list = p?.price_list_id ? listById.get(p.price_list_id) : undefined
       return {
         id: u.id,
         email: u.email ?? "—",
@@ -99,9 +120,47 @@ export async function adminListCustomers(): Promise<AdminCustomer[]> {
         role: p?.role ?? "customer",
         isApproved: Boolean(p?.is_approved),
         createdAt: u.created_at,
+        priceListId: p?.price_list_id ?? null,
+        priceListName: list?.name ?? null,
+        discountPct: Number(list?.discount_pct ?? 0),
+        verificationNote: p?.verification_note ?? null,
+        verificationOutcome: p?.verification_outcome ?? null,
       }
     })
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+}
+
+export type AdminPriceList = {
+  id: string
+  name: string
+  discountPct: number
+  /** Ilu klientów korzysta z tego cennika — ostrzeżenie przed usunięciem. */
+  customerCount: number
+}
+
+/** Cenniki rabatowe wraz z liczbą przypisanych klientów (najwyższy rabat pierwszy). */
+export async function adminListPriceLists(): Promise<AdminPriceList[]> {
+  const supabase = createAdminClient()
+  const [{ data: lists }, { data: profiles }] = await Promise.all([
+    supabase
+      .from("price_lists")
+      .select("id, name, discount_pct")
+      .order("discount_pct", { ascending: false }),
+    supabase.from("profiles").select("price_list_id"),
+  ])
+
+  const countById = new Map<string, number>()
+  for (const p of profiles ?? []) {
+    if (!p.price_list_id) continue
+    countById.set(p.price_list_id, (countById.get(p.price_list_id) ?? 0) + 1)
+  }
+
+  return (lists ?? []).map((l) => ({
+    id: l.id,
+    name: l.name,
+    discountPct: Number(l.discount_pct),
+    customerCount: countById.get(l.id) ?? 0,
+  }))
 }
 
 export type AdminOrderItem = {
@@ -115,6 +174,10 @@ export type AdminOrder = {
   createdAt: string
   status: string
   totalNet: number
+  /** Kwoty zapisane przy składaniu zamówienia (migracja 0003); null = starsze zamówienie. */
+  subtotalNet: number | null
+  discountNet: number | null
+  shippingNet: number | null
   customerEmail: string
   customerCompany: string | null
   address: string | null
@@ -138,7 +201,9 @@ export async function adminListOrders(): Promise<AdminOrder[]> {
   const supabase = createAdminClient()
   const { data: orders } = await supabase
     .from("orders")
-    .select("id, profile_id, status, total_net, created_at, shipping_address_id")
+    .select(
+      "id, profile_id, status, total_net, subtotal_net, discount_net, shipping_net, created_at, shipping_address_id"
+    )
     .order("created_at", { ascending: false })
 
   if (!orders || orders.length === 0) return []
@@ -224,6 +289,9 @@ export async function adminListOrders(): Promise<AdminOrder[]> {
       createdAt: o.created_at,
       status: o.status,
       totalNet: o.total_net,
+      subtotalNet: o.subtotal_net ?? null,
+      discountNet: o.discount_net ?? null,
+      shippingNet: o.shipping_net ?? null,
       customerEmail: emailById.get(o.profile_id) ?? "—",
       customerCompany: companyById.get(o.profile_id) ?? null,
       address: o.shipping_address_id
@@ -239,4 +307,105 @@ export async function adminListOrders(): Promise<AdminOrder[]> {
       weightGrams: estimateWeightGrams(items),
     }
   })
+}
+
+export type AdminProductDetail = {
+  id: string
+  slug: string
+  name: string
+  shortDescription: string
+  description: string
+  isPublished: boolean
+  image: string
+}
+
+/** Jeden produkt do edycji na stronie /admin/produkty/[slug]. */
+export async function adminGetProduct(
+  slug: string
+): Promise<AdminProductDetail | null> {
+  const supabase = createAdminClient()
+  const { data } = await supabase
+    .from("products")
+    .select("id, slug, name, short_description, description, is_published, image")
+    .eq("slug", slug)
+    .maybeSingle()
+  if (!data) return null
+  return {
+    id: data.id,
+    slug: data.slug,
+    name: data.name,
+    shortDescription: data.short_description ?? "",
+    description: data.description ?? "",
+    isPublished: Boolean(data.is_published),
+    image: data.image ?? "",
+  }
+}
+
+export type AdminBanner = {
+  id: string
+  sort: number
+  isPublished: boolean
+  image: string
+  alt: string
+  eyebrow: string
+  title: string
+  subtitle: string
+  ctaLabel: string
+  ctaHref: string
+}
+
+/** Wszystkie banery — także ukryte — do edycji w panelu. */
+export async function adminListBanners(): Promise<AdminBanner[]> {
+  const supabase = createAdminClient()
+  const { data } = await supabase
+    .from("banners")
+    .select(
+      "id, sort, is_published, image, alt, eyebrow, title, subtitle, cta_label, cta_href"
+    )
+    .order("sort", { ascending: true })
+
+  return (data ?? []).map((b) => ({
+    id: b.id,
+    sort: Number(b.sort ?? 0),
+    isPublished: Boolean(b.is_published),
+    image: b.image ?? "",
+    alt: b.alt ?? "",
+    eyebrow: b.eyebrow ?? "",
+    title: b.title ?? "",
+    subtitle: b.subtitle ?? "",
+    ctaLabel: b.cta_label ?? "",
+    ctaHref: b.cta_href ?? "",
+  }))
+}
+
+/**
+ * Zdjęcia leżące w /public — podpowiedzi do pola „Zdjęcie" w banerach.
+ * Właściciel wybiera spośród tego, co już jest na serwerze; wgranie zupełnie
+ * nowego pliku nadal wymaga programisty (patrz uwaga w panelu).
+ */
+export async function listPublicImages(): Promise<string[]> {
+  const { readdir } = await import("node:fs/promises")
+  const { join } = await import("node:path")
+  const root = join(process.cwd(), "public")
+  const out: string[] = []
+  const exts = /\.(png|jpe?g|webp|avif|svg)$/i
+
+  async function walk(dir: string, prefix: string) {
+    let entries
+    try {
+      entries = await readdir(dir, { withFileTypes: true })
+    } catch {
+      return
+    }
+    for (const e of entries) {
+      if (e.name.startsWith(".")) continue
+      if (e.isDirectory()) {
+        await walk(join(dir, e.name), `${prefix}/${e.name}`)
+      } else if (exts.test(e.name)) {
+        out.push(`${prefix}/${e.name}`)
+      }
+    }
+  }
+  await walk(root, "")
+  return out.sort()
 }
