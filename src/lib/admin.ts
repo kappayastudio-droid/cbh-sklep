@@ -87,6 +87,9 @@ export type AdminCustomer = {
   priceListId: string | null
   priceListName: string | null
   discountPct: number
+  /** Powód oczekiwania z automatycznej weryfikacji NIP (null = konto sprzed tej funkcji). */
+  verificationNote: string | null
+  verificationOutcome: string | null
 }
 
 /** Lista klientów (auth.users + profiles) — do zatwierdzania i rabatów w panelu. */
@@ -97,7 +100,9 @@ export async function adminListCustomers(): Promise<AdminCustomer[]> {
       supabase.auth.admin.listUsers(),
       supabase
         .from("profiles")
-        .select("id, role, is_approved, company_name, price_list_id"),
+        .select(
+          "id, role, is_approved, company_name, price_list_id, verification_note, verification_outcome"
+        ),
       supabase.from("price_lists").select("id, name, discount_pct"),
     ])
 
@@ -118,6 +123,8 @@ export async function adminListCustomers(): Promise<AdminCustomer[]> {
         priceListId: p?.price_list_id ?? null,
         priceListName: list?.name ?? null,
         discountPct: Number(list?.discount_pct ?? 0),
+        verificationNote: p?.verification_note ?? null,
+        verificationOutcome: p?.verification_outcome ?? null,
       }
     })
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt))

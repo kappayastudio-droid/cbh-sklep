@@ -155,6 +155,22 @@ export default async function AccountPage({
           </div>
         )}
 
+        {!session.isApproved && (
+          <div
+            role="status"
+            className="rounded-lg border border-[#787169]/30 bg-[#787169]/10 px-md py-sm"
+          >
+            <p className="text-body2 font-medium text-foreground">
+              Sprawdzamy dane Twojej firmy
+            </p>
+            <p className="mt-2xs text-body2 text-muted-foreground">
+              Zwykle trwa to do następnego dnia roboczego — damy znać mailem,
+              gdy ceny będą widoczne. Jeśli zamówienie jest pilne, zadzwoń:
+              odbieramy tak samo jak dotąd.
+            </p>
+          </div>
+        )}
+
         {/* Dane konta — edycja */}
         <div className="rounded-lg border border-border bg-surface-1 p-lg">
           <div className="mb-md flex flex-wrap items-center justify-between gap-sm">

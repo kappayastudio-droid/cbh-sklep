@@ -21,6 +21,13 @@ export default async function AdminCustomersPage() {
           : "Brak kont oczekujących na zatwierdzenie."}
       </Typography>
 
+      <Typography variant="caption" className="text-muted-foreground">
+        Konta z potwierdzonym NIP-em zatwierdzają się same. Poniżej widzisz te,
+        których wykaz VAT nie potwierdził — najczęściej firmy zwolnione z VAT,
+        które w wykazie po prostu nie figurują. To normalne, wystarczy sprawdzić
+        i kliknąć „Zatwierdź".
+      </Typography>
+
       {priceLists.length === 0 && (
         <Typography variant="body2" className="text-muted-foreground">
           Nie masz jeszcze żadnego cennika rabatowego — dodaj go w zakładce
@@ -56,9 +63,16 @@ export default async function AdminCustomersPage() {
                       zatwierdzony
                     </span>
                   ) : (
-                    <span className="rounded-full border border-border px-2 py-0.5 text-caption text-muted-foreground">
-                      oczekuje
-                    </span>
+                    <div className="flex flex-col gap-2xs">
+                      <span className="w-fit rounded-full border border-border px-2 py-0.5 text-caption text-muted-foreground">
+                        oczekuje
+                      </span>
+                      {c.verificationNote && (
+                        <span className="max-w-[22rem] text-caption text-muted-foreground">
+                          {c.verificationNote}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </td>
                 <td className="py-sm pr-md">
