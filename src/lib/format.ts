@@ -9,6 +9,23 @@ export function formatPriceNet(grosze: number): string {
   return `${zlStr},${gr.toString().padStart(2, "0")} zł`
 }
 
+/**
+ * Kwota do WKLEJENIA w innym programie: "1234,56" — bez separatora tysięcy
+ * i bez „zł".
+ *
+ * `formatPriceNet` rozdziela tysiące TWARDĄ SPACJĄ (U+00A0) i dokleja walutę,
+ * co wygląda dobrze na ekranie, ale wklejone w pole kwoty w programie
+ * księgowym zostaje odrzucone albo po cichu przekłamane. Do pól formularzy
+ * używaj wyłącznie tej funkcji.
+ */
+export function formatAmountBare(grosze: number): string {
+  const sign = grosze < 0 ? "-" : ""
+  const abs = Math.abs(grosze)
+  return `${sign}${Math.floor(abs / 100)},${(abs % 100)
+    .toString()
+    .padStart(2, "0")}`
+}
+
 /** Stawka VAT (23%). Sklep pokazuje ceny netto, pobiera brutto. */
 export const VAT_RATE = 0.23
 
