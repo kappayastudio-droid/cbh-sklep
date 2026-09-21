@@ -192,6 +192,17 @@ export type AdminOrder = {
     postalCode: string
     city: string
   } | null
+  /**
+   * Adres NABYWCY — domyślny adres z konta, podany przy rejestracji.
+   * To on należy na fakturę (art. 106e ust. 1 pkt 3), a nie adres dostawy:
+   * salon bywa zarejestrowany gdzie indziej, niż odbiera paczkę.
+   */
+  billingAddr: {
+    line1: string
+    line2: string | null
+    postalCode: string
+    city: string
+  } | null
   /** Szacowana waga paczki (gram) — podpowiedź, edytowalna przy nadawaniu. */
   weightGrams: number
 }
@@ -214,8 +225,13 @@ export async function adminListOrders(): Promise<AdminOrder[]> {
     .map((o) => o.shipping_address_id)
     .filter((id): id is string => Boolean(id))
 
-  const [{ data: items }, { data: profiles }, { data: addresses }, usersRes] =
-    await Promise.all([
+  const [
+    { data: items },
+    { data: profiles },
+    { data: addresses },
+    usersRes,
+    { data: billingAddresses },
+  ] = await Promise.all([
       supabase
         .from("order_items")
         .select("order_id, name_snapshot, unit_price_net, qty")
@@ -231,6 +247,11 @@ export async function adminListOrders(): Promise<AdminOrder[]> {
             .in("id", addressIds)
         : Promise.resolve({ data: [] as Record<string, string>[] }),
       supabase.auth.admin.listUsers(),
+      supabase
+        .from("addresses")
+        .select("profile_id, line1, line2, city, postal_code")
+        .in("profile_id", profileIds)
+        .eq("is_default", true),
     ])
 
   const itemsByOrder = new Map<string, AdminOrderItem[]>()
@@ -263,6 +284,17 @@ export async function adminListOrders(): Promise<AdminOrder[]> {
   const addrPartsById = new Map(
     (addresses ?? []).map((a) => [
       a.id,
+      {
+        line1: a.line1 ?? "",
+        line2: a.line2 ?? null,
+        postalCode: a.postal_code ?? "",
+        city: a.city ?? "",
+      },
+    ])
+  )
+  const billingByProfile = new Map(
+    (billingAddresses ?? []).map((a) => [
+      a.profile_id,
       {
         line1: a.line1 ?? "",
         line2: a.line2 ?? null,
@@ -304,6 +336,7 @@ export async function adminListOrders(): Promise<AdminOrder[]> {
       addr: o.shipping_address_id
         ? (addrPartsById.get(o.shipping_address_id) ?? null)
         : null,
+      billingAddr: billingByProfile.get(o.profile_id) ?? null,
       weightGrams: estimateWeightGrams(items),
     }
   })

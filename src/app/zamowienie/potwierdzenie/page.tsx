@@ -11,12 +11,19 @@ import { Typography } from "@/components/ui/typography"
 import { useCart } from "@/lib/cart/cart-context"
 
 export default function OrderConfirmationPage() {
-  const { clear } = useCart()
+  const { clear, hydrated } = useCart()
 
-  // Zamówienie złożone → czyścimy koszyk (raz, po wejściu na stronę).
+  // Zamówienie złożone → czyścimy koszyk.
+  //
+  // MUSI czekać na `hydrated`. Po płatności wracamy tu z Przelewy24 jako NOWE
+  // wejście na stronę, a React uruchamia efekty od dziecka do rodzica: efekt
+  // tej strony wykonałby się PRZED efektem CartProvidera, który dopiero wczytuje
+  // koszyk z localStorage. Wyczyszczony koszyk byłby więc natychmiast odtworzony
+  // i zapisany z powrotem — dokładnie to widać było w sklepie.
   React.useEffect(() => {
+    if (!hydrated) return
     clear()
-  }, [clear])
+  }, [hydrated, clear])
 
   return (
     <>

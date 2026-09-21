@@ -101,6 +101,7 @@ export default async function AdminOrdersPage() {
             line2={o.addr?.line2 ?? null}
             postalCode={o.addr?.postalCode ?? ""}
             city={o.addr?.city ?? ""}
+            billingAddr={o.billingAddr}
             items={o.items}
             totalNet={o.totalNet}
             subtotalNet={o.subtotalNet}
