@@ -75,6 +75,9 @@ const PRODUCT_SLUG_MAP: Record<string, string> = {
   // Kuracja 4x6 ml wycofana — kierujemy na wariant 12x6 ml.
   "regal-life-ampulki-kuracja-4-x-6-ml": "regal-life-ampulki-kuracja-12-x-6-ml",
 
+  // Produkt przemianowany z „Porosity Equalizer" na „Pair Equalizer".
+  "porosity-equalizer-150ml": "pair-equalizer-150ml",
+
   // — slugi, które się nie zmieniły, obsługuje reguła ogólna /produkt/:slug —
 }
 
@@ -108,6 +111,9 @@ const EXACT_MAP: Record<string, string> = {
   "/serie/trwala": "/kategorie/produkty-techniczne",
   "/serie/urbn": "/kategorie/ochrona-wlosow",
   "/serie/vitamin-colors": "/kategorie/koloryzacja",
+
+  // Zmiana nazwy produktu już na nowej stronie (Porosity → Pair).
+  "/produkty/porosity-equalizer-150ml": "/produkty/pair-equalizer-150ml",
 
   // Produkty bez odpowiednika 1:1
   "/produkt/intensyfikatory-koloru": "/kategorie/koloryzacja",

@@ -61,8 +61,8 @@ export type Brand = {
 export const ALL_PRODUCTS: Product[] = [
   {
     "id": "1448",
-    "slug": "porosity-equalizer-150ml",
-    "name": "Porosity Equalizer 150ml",
+    "slug": "pair-equalizer-150ml",
+    "name": "Pair Equalizer 150ml",
     "category": "Ochrona włosów",
     "categorySlug": "ochrona-wlosow",
     "categories": [
@@ -74,7 +74,7 @@ export const ALL_PRODUCTS: Product[] = [
     "brand": "Chenice",
     "brandSlug": "chenice",
     "shortDescription": "Spray w formie fluidu wyrównujący porowatość włosów przed zabiegami technicznymi. Ujednolica strukturę włosa, poprawia wchłanianie preparatów i optymalizuje efekty koloryzacji oraz innych usług chemicznych.",
-    "description": "POROSITY EQUALIZER to specjalistyczny fluid w sprayu przeznaczony do stosowania przed zabiegami technicznymi, takimi jak koloryzacja, rozjaśnianie, trwała ondulacja czy prostowanie. Jego zaawansowana, innowacyjna formuła zawiera składniki aktywne nowej generacji, które działają cementująco na strukturę włosa, wyrównując jego porowatość na całej długości. Produkt ujednolica strukturę włosa, dzięki czemu substancje chemiczne są absorbowane równomiernie, co przekłada się na lepszy, bardziej przewidywalny i trwały efekt końcowy zabiegu. Włókno włosa zostaje wzmocnione, zrewitalizowane i lepiej przygotowane do dalszych procesów technicznych. Formuła zawiera żel aloesowy o właściwościach zmiękczających i nawilżających, który pomaga utrzymać odpowiedni poziom wilgoci we włosach, oraz keratynę roślinną · wielobiałkowy kompleks pochodzenia roślinnego o zbalansowanym składzie. Keratyna roślinna wnika w strukturę włosa, tworząc ochronną sieć, która cementuje, wzmacnia i chroni różnice strukturalne trzonu włosa. Zastosowanie przed koloryzacją pozwala wyrównać strukturę włosów, ujednolicić absorpcję koloru i poprawić ostateczny efekt koloryzacji. Stosowany przed rozjaśnianiem, trwałą ondulacją lub prostowaniem, ujednolica strukturę włosa, wzmacnia włókno i zwiększa skuteczność oraz jakość zabiegu technicznego.",
+    "description": "PAIR EQUALIZER to specjalistyczny fluid w sprayu przeznaczony do stosowania przed zabiegami technicznymi, takimi jak koloryzacja, rozjaśnianie, trwała ondulacja czy prostowanie. Jego zaawansowana, innowacyjna formuła zawiera składniki aktywne nowej generacji, które działają cementująco na strukturę włosa, wyrównując jego porowatość na całej długości. Produkt ujednolica strukturę włosa, dzięki czemu substancje chemiczne są absorbowane równomiernie, co przekłada się na lepszy, bardziej przewidywalny i trwały efekt końcowy zabiegu. Włókno włosa zostaje wzmocnione, zrewitalizowane i lepiej przygotowane do dalszych procesów technicznych. Formuła zawiera żel aloesowy o właściwościach zmiękczających i nawilżających, który pomaga utrzymać odpowiedni poziom wilgoci we włosach, oraz keratynę roślinną · wielobiałkowy kompleks pochodzenia roślinnego o zbalansowanym składzie. Keratyna roślinna wnika w strukturę włosa, tworząc ochronną sieć, która cementuje, wzmacnia i chroni różnice strukturalne trzonu włosa. Zastosowanie przed koloryzacją pozwala wyrównać strukturę włosów, ujednolicić absorpcję koloru i poprawić ostateczny efekt koloryzacji. Stosowany przed rozjaśnianiem, trwałą ondulacją lub prostowaniem, ujednolica strukturę włosa, wzmacnia włókno i zwiększa skuteczność oraz jakość zabiegu technicznego.",
     "image": "/produkty/Pair.png",
     "images": [
       "https://cbh-polska.pl/wp-content/uploads/2024/10/Pair.png"
