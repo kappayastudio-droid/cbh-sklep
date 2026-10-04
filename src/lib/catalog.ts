@@ -1,6 +1,7 @@
 import "server-only"
 import { cache } from "react"
 
+import { isProductAvailable } from "@/lib/availability"
 import { formatPriceNet } from "@/lib/format"
 import { deriveLine } from "@/lib/product-line"
 import { createClient } from "@/lib/supabase/server"
@@ -117,15 +118,36 @@ const getCatalog = cache(fetchCatalog)
 
 // ── Publiczne API (parytet z src/lib/products.ts, ale async) ──
 
-export async function getVisibleProducts(): Promise<Product[]> {
+/** Wszystkie opublikowane produkty — także chwilowo niedostępne. */
+async function getAllProducts(): Promise<Product[]> {
   const data = await getCatalog()
-  return (data?.products ?? ALL_PRODUCTS).filter((p) => p.inStock)
+  return data?.products ?? ALL_PRODUCTS
 }
 
+/**
+ * Produkty pokazywane na listach (sklep, kategorie, marki, bestsellery, sitemap).
+ *
+ * Dostępność liczy `isProductAvailable`, bo stan magazynowy siedzi w DWÓCH
+ * miejscach: `products.in_stock` oraz stan wariantu (dla produktu bez wariantów
+ * — syntetycznego wariantu „default", i to jego odznacza panel). Wcześniej
+ * filtr patrzył wyłącznie na flagę produktu, więc odznaczenie „na stanie"
+ * w panelu nie usuwało produktu ze sklepu.
+ */
+export async function getVisibleProducts(): Promise<Product[]> {
+  return (await getAllProducts()).filter(isProductAvailable)
+}
+
+/**
+ * Karta produktu po slugu — celowo z PEŁNEJ listy, nie z `getVisibleProducts`.
+ *
+ * Produkt chwilowo niedostępny znika z list, ale jego adres ma nadal działać:
+ * jest zaindeksowany w Google i podlinkowany w mailach. Strona pokazuje wtedy
+ * „Chwilowo niedostępny" i zablokowany przycisk zamiast zwracać 404.
+ */
 export async function getProductBySlug(
   slug: string
 ): Promise<Product | undefined> {
-  return (await getVisibleProducts()).find((p) => p.slug === slug)
+  return (await getAllProducts()).find((p) => p.slug === slug)
 }
 
 export async function getProductsByCategory(
