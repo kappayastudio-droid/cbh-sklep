@@ -113,27 +113,60 @@ export async function signup(formData: FormData) {
         const v = await verifyBusinessByNip(rawNip)
         approvedNow = v.outcome === "approved"
 
-        await admin
+        // KRYTYCZNE: samo zatwierdzenie idzie OSOBNYM zapytaniem, na kolumnie,
+        // która istnieje od pierwszej wersji schematu.
+        //
+        // Wcześniej `is_approved` leciało w jednym update razem z
+        // `verification_outcome` / `verification_note`. Gdy migracja dokładająca
+        // te kolumny nie była wgrana na produkcji, PostgREST odrzucał CAŁY
+        // update — więc konto z poprawnym, potwierdzonym NIP-em zostawało
+        // niezatwierdzone, a klient widział komunikat o powodzeniu. Błąd nie
+        // był nigdzie sprawdzany, więc nic tego nie sygnalizowało.
+        const { error: approvalError } = await admin
+          .from("profiles")
+          .update({ is_approved: v.outcome === "approved" })
+          .eq("id", data.user.id)
+
+        if (approvalError) {
+          approvedNow = false
+          console.error(
+            "[rejestracja] nie udało się zapisać is_approved",
+            approvalError
+          )
+        }
+
+        // Notatka weryfikacyjna i ślad audytowy są DODATKIEM. Ich brak (np. gdy
+        // migracja nie jest jeszcze wgrana) nie może cofnąć zatwierdzenia.
+        const { error: noteError } = await admin
           .from("profiles")
           .update({
-            is_approved: v.outcome === "approved",
             verification_outcome: v.outcome,
             verification_note: v.note,
           })
           .eq("id", data.user.id)
 
-        await admin.from("nip_verifications").insert({
-          nip: looksLikeForeignVat(rawNip) ? rawNip : normalizeNip(rawNip),
-          profile_id: data.user.id,
-          outcome: v.outcome,
-          reason: v.reason,
-          note: v.note,
-          status_vat: v.statusVat ?? null,
-          registry_name: v.registryName ?? null,
-          registry_address: v.registryAddress ?? null,
-          regon: v.regon ?? null,
-          request_id: v.requestId ?? null,
-        })
+        if (noteError) {
+          console.error("[rejestracja] brak kolumn weryfikacji", noteError)
+        }
+
+        const { error: auditError } = await admin
+          .from("nip_verifications")
+          .insert({
+            nip: looksLikeForeignVat(rawNip) ? rawNip : normalizeNip(rawNip),
+            profile_id: data.user.id,
+            outcome: v.outcome,
+            reason: v.reason,
+            note: v.note,
+            status_vat: v.statusVat ?? null,
+            registry_name: v.registryName ?? null,
+            registry_address: v.registryAddress ?? null,
+            regon: v.regon ?? null,
+            request_id: v.requestId ?? null,
+          })
+
+        if (auditError) {
+          console.error("[rejestracja] brak tabeli nip_verifications", auditError)
+        }
       }
     } catch {
       // Błąd zapisu adresu/promocji nie może blokować rejestracji.
