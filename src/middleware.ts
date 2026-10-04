@@ -36,7 +36,26 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return await updateSession(request)
+  const { response, isAuthenticated } = await updateSession(request)
+
+  // Sklep jest B2B: koszyk i zamówienie istnieją wyłącznie dla zalogowanych.
+  // Ikona koszyka jest ukryta w nawigacji (TopNav), ale sam adres musi być
+  // zamknięty — inaczej wystarczy wpisać /koszyk z palca.
+  const { pathname } = request.nextUrl
+  const requiresLogin =
+    pathname === "/koszyk" ||
+    pathname.startsWith("/koszyk/") ||
+    pathname === "/zamowienie" ||
+    pathname.startsWith("/zamowienie/")
+
+  if (requiresLogin && !isAuthenticated) {
+    const url = request.nextUrl.clone()
+    url.pathname = "/login"
+    url.search = ""
+    return NextResponse.redirect(url)
+  }
+
+  return response
 }
 
 export const config = {
