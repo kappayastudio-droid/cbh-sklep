@@ -235,7 +235,7 @@ export function TopNav({
               </>
             ) : (
               <>
-                <CartButton />
+                {/* Bez koszyka — sklep B2B, zakupy dopiero po zalogowaniu. */}
                 <Button variant="ghost" size="sm" render={<Link href="/login" />}>
                   Zaloguj się
                 </Button>
@@ -248,7 +248,7 @@ export function TopNav({
 
         {/* Koszyk + menu — mobile */}
         <div className="flex items-center gap-sm md:hidden">
-          <CartButton />
+          {isAuthenticated && <CartButton />}
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger
             render={
